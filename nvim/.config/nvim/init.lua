@@ -45,8 +45,6 @@ vim.api.nvim_create_autocmd('TextYankPost', {
   end,
 })
 
-vim.o.scrolloff = 40 -- Minimal number of screen lines to keep above and below the cursor.
-vim.o.confirm = true
 opt.fillchars = {
   diff = '╱',
 }
@@ -78,8 +76,6 @@ rtp:prepend(lazypath)
 local commands = require 'custom.commands'
 -- NOTE: Here is where you install your plugins.
 require('lazy').setup({
-  -- NOTE: Plugins can be added with a link (or for a github repo: 'owner/repo' link).
-  'tpope/vim-rhubarb',
   { -- Adds git related signs to the gutter, as well as utilities for managing changes
     'lewis6991/gitsigns.nvim',
     opts = {
@@ -90,7 +86,6 @@ require('lazy').setup({
         topdelete = { text = '‾' },
         changedelete = { text = '~' },
       },
-      vim.keymap,
     },
   },
   { -- Useful plugin to show you pending keybinds.
@@ -664,9 +659,6 @@ vim.keymap.set('n', '<C-k>', function()
   vim.cmd 'cprev'
 end, { desc = 'cprev' })
 
-vim.keymap.set('n', '<leader>o', ':tab Git<CR>', { desc = 'open git in tab' })
-vim.keymap.set('n', '<leader>gc', ':Git commit %<CR>', { desc = 'commit current file' })
-
 ----- git keymaps
 vim.keymap.set('n', '<leader>go', ':tab Git<CR>', { desc = 'open git in tab' })
 vim.keymap.set('n', '<leader>gc', ':Git commit', { desc = 'Make a git commit' })
@@ -682,8 +674,6 @@ local function insert_print_from_word()
   local w = vim.fn.expand '<cword>'
   vim.api.nvim_put({ 'print("' .. w .. ': ", ' .. w .. ')' }, 'l', true, true)
 end
-
-vim.keymap.set('n', '<leader>p', insert_print_from_word)
 
 local function insert_print_from_visual()
   -- get visually selected text
@@ -707,7 +697,6 @@ end
 
 vim.keymap.set('n', '<leader>p', insert_print_from_word)
 -- keymap for visual mode
-vim.keymap.set('v', '<leader>p', insert_print_from_visual, { silent = true })
 vim.keymap.set('v', '<leader>p', insert_print_from_visual, { silent = true })
 
 -- Set the Python host executable for Neovim's Python support
