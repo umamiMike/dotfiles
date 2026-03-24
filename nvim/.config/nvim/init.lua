@@ -26,6 +26,7 @@ opt.splitright = true
 opt.splitbelow = true
 opt.list = true
 opt.listchars = { tab = '» ', trail = '·', nbsp = '␣' }
+opt.linebreak = true
 
 opt.inccommand = 'split' -- Preview substitutions live, as you type!
 opt.cursorline = true -- Show which line your cursor is on
@@ -44,6 +45,24 @@ vim.api.nvim_create_autocmd('TextYankPost', {
     vim.hl.on_yank()
   end,
 })
+
+-- -- In your init.lua or a utility file
+-- vim.api.nvim_create_autocmd("VimEnter", {
+--   callback = function()
+--     vim.cmd("botright vsplit")
+--     vim.cmd("vertical resize 4")
+--     local win = vim.api.nvim_get_current_win()
+--     local buf = vim.api.nvim_create_buf(false, true)
+--     vim.api.nvim_win_set_buf(win, buf)
+--     vim.api.nvim_win_set_option(win, "winfixwidth", true)
+--     vim.api.nvim_win_set_option(win, "number", false)
+--     vim.api.nvim_win_set_option(win, "relativenumber", false)
+--     vim.api.nvim_win_set_option(win, "signcolumn", "no")
+--     vim.api.nvim_win_set_option(win, "statuscolumn", "")
+--     vim.cmd("wincmd p")  -- jump back to previous window
+--   end,
+-- })
+
 
 opt.fillchars = {
   diff = '╱',
@@ -665,9 +684,8 @@ vim.keymap.set('n', '<leader>gc', ':Git commit', { desc = 'Make a git commit' })
 vim.keymap.set('n', '<leader>gca', ':Git commit --amend', { desc = 'Amend the commit message' })
 vim.keymap.set('n', '<leader>ga', ':Git add %<CR>', { desc = 'add current file' })
 vim.keymap.set('n', 'td', commands.toggle_buf, { desc = 'Toggle todo.md' })
-vim.keymap.set('n', '<leader>cc', function()
-  vim.fn.system "tmux split-window -h 'claude'"
-end, { noremap = true, silent = true, desc = 'Open Claude Code in tmux split' })
+vim.keymap.set('n', '<leader>o', function()
+vim.fn.system "tmux split-window -h 'claude'" end, { noremap = true, silent = true, desc = 'Open Claude Code in tmux split' })
 
 ------------ python specific functions
 local function insert_print_from_word()

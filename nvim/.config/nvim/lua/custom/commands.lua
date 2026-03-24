@@ -122,5 +122,5 @@ function M.extract_to_new_file()
 		end
 	end)
 end
-
 return M
+

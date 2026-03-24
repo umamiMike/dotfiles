@@ -125,3 +125,23 @@ vim.api.nvim_create_autocmd("FileType", {
       -- 		},
       -- 	},
       -- },
+
+
+
+
+-- -- In your init.lua or a utility file
+-- vim.api.nvim_create_autocmd("VimEnter", {
+--   callback = function()
+--     vim.cmd("botright vsplit")
+--     vim.cmd("vertical resize 4")
+--     local win = vim.api.nvim_get_current_win()
+--     local buf = vim.api.nvim_create_buf(false, true)
+--     vim.api.nvim_win_set_buf(win, buf)
+--     vim.api.nvim_win_set_option(win, "winfixwidth", true)
+--     vim.api.nvim_win_set_option(win, "number", false)
+--     vim.api.nvim_win_set_option(win, "relativenumber", false)
+--     vim.api.nvim_win_set_option(win, "signcolumn", "no")
+--     vim.api.nvim_win_set_option(win, "statuscolumn", "")
+--     vim.cmd("wincmd p")  -- jump back to previous window
+--   end,
+-- })
