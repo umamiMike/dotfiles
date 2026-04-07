@@ -1,0 +1,280 @@
+#!/bin/sh
+
+alias ls='ls -pG'
+alias al="alias | fzf"
+alias calc='bc -l'
+alias clc="fc -ln -1 | awk '{\$1=\$1}1' | xclip -selection clipboard"
+
+# docker ========================================================================================
+if command docker &> /dev/null
+then
+  alias d="docker"
+  alias dc="docker compose "
+  alias dka='docker kill $(docker ps -a -q)'
+  alias dps="docker ps"
+fi
+alias ducks='du -hcks * | sort -rn | head'
+alias wild-ffrom='ff="$(fzf | xargs cat )"; echo "$ff" | fzf'
+
+alias fswatch-ruby="fswatch -o -r --event=Created --event=Updated lib test"
+
+alias ga='git add'
+alias gig='git add .gitignore && git commit -m "ignore"'
+alias gb='git branch'
+alias gc='git checkout'
+alias gcb='git checkout -b'
+alias gca='git commit --amend'
+alias gcme='git commit -m '
+alias gd='git diff'
+
+alias gdno='git diff --name-only'
+alias gl='git log'
+alias glo='git log --oneline' 
+
+alias gp='git push'
+alias gpo='git push origin'
+alias gpsu='git push --set-upstream origin $(git branch --show-current)'
+
+alias grst='git restore --staged'  # use when accidentally git added something
+alias grv='git remote -v'
+
+alias gs='git status'
+
+# Git alias tab completions (bash + zsh compatible)
+if [ -n "$ZSH_VERSION" ]; then
+  # Wrapper approach: rewrite words array so zsh's native _git sees
+  # "git <subcommand> ..." rather than the alias name, avoiding bash
+  # completion functions (e.g. __git_find_on_cmdline) that fail in zsh.
+  _make_git_alias_completion() {
+    local alias_name="$1" subcmd="$2"
+    eval "_gitcomp_${alias_name}() {
+      local service=git
+      curcontext=\"\${curcontext//${alias_name}/git}\"
+      words=(git ${subcmd} \"\${words[@]:1}\")
+      (( CURRENT++ ))
+      _git
+    }"
+    compdef "_gitcomp_${alias_name}" "${alias_name}"
+  }
+  _make_git_alias_completion ga      add
+  _make_git_alias_completion gig     commit
+  _make_git_alias_completion gb      branch
+  _make_git_alias_completion gc      checkout
+  _make_git_alias_completion gcb     checkout
+  _make_git_alias_completion gca     commit
+  _make_git_alias_completion gcme    commit
+  _make_git_alias_completion gd      diff
+  _make_git_alias_completion gdno    diff
+  _make_git_alias_completion gl      log
+  _make_git_alias_completion glo     log
+  _make_git_alias_completion gp      push
+  _make_git_alias_completion gpo     push
+  _make_git_alias_completion gpsu    push
+  _make_git_alias_completion grst    restore
+  _make_git_alias_completion grv     remote
+  _make_git_alias_completion gs      status
+  unfunction _make_git_alias_completion
+elif [ -n "$BASH_VERSION" ]; then
+  if type __git_complete &>/dev/null; then
+    __git_complete ga _git_add
+    __git_complete gb _git_branch
+    __git_complete gc _git_checkout
+    __git_complete gcb _git_checkout
+    __git_complete gca _git_commit
+    __git_complete gcme _git_commit
+    __git_complete gd _git_diff
+    __git_complete gdno _git_diff
+    __git_complete gl _git_log
+    __git_complete glo _git_log
+    __git_complete gp _git_push
+    __git_complete gpo _git_push
+    __git_complete gpsu _git_push
+    __git_complete grst _git_restore
+    __git_complete grv _git_remote
+    __git_complete gs _git_status
+  fi
+fi
+
+alias hh='cat ~/.bash_history | sort | uniq | fzf'
+alias gsls="gsutil ls | fzf | xargs gsutil ls "
+
+#
+alias nvf='nvim $(fzf)'
+#
+# usage > op | xargs cat >> somefile.txt  will echo every selected file to a single text file
+alias op="fzf --preview='less {}' --bind shift-up:preview-page-up,shift-down:preview-page-down"
+
+alias rgf="rg --files | rg "
+alias se="source $bf/aliases.sh"
+
+alias np="nix profile"
+
+alias snvim="sudo /home/mike/.nix-profile/bin/nvim"
+alias updateshell="nvim ~/.config/wilding/aliases.sh && source ~/.zshrc"
+
+mkdo () {
+  mkdir $1
+  cd $1
+}
+
+cheat () {
+  echo "${*}"
+  curl -s "https://cheat.sh/${*}?T" | cat
+}
+hn () {
+cd $mob/projects
+logts=$(date +"%Y%m%d")
+hugo new "${1}${logts}.md" &> /dev/null
+nvim content/"${1}${logts}.md"
+cd -
+}
+
+projects () {
+  cd $HOME/repos/project-hub/
+  nvim -c ":FindFiles ${*}"
+  cd -
+}
+
+# I liked it in elixir so I made a little convenience function for help
+h () {
+  $1 --help | bat
+}
+
+paths () {
+  echo $PATH | sed -r 's/\:/\n/g'
+}
+
+# make a temporary json file
+tjson() { 
+mktemp --suffix ".json" 
+}
+
+
+resources () {
+cd $mob/projects/content/
+nvim .
+cd -
+
+}
+
+gitdiff () {
+  [ $# -eq 0 ] && diffy=0 || diffy="$*"
+  echo "$diffy"
+  git diff HEAD~"$diffy" | diff-so-fancy | bat
+}
+
+
+# TMUX ==================================================================
+
+alias mux="tmuxinator"
+compdef mux=tmuxinator
+alias tmuxe="nvim $bf/tmux.conf"
+alias tmuxs="tmux source-file $bf/tmux.conf"
+
+
+# elixir  ===============================================================
+#
+# alias mixtest="fswatch -o -r --event=Created --event=Updated lib test | mix test  --listen-on-stdin"
+function mixtest() {
+  [ "$1" != "" ] && cmd="$1"  || cmd="mix test --listen-on-stdin"
+  fswatch -o -r --event=Created --event=Updated lib test | eval $cmd
+}
+
+alias fselixir="fswatch -o -r --event=Created --event=Updated lib test"
+# elixir related
+
+# dealing with overloaded printout
+# feeds the test in to a log file 
+# and trims out everything but the first 1000 lines
+function mixtesthead () {
+  [ "$1" != "" ] && cmd="$1"  || cmd="mix test"
+  eval "$cmd" >| runlog.ex
+  sed -i '1000,$d' runlog.ex
+  nvim runlog.ex
+}
+# various =============================================================
+#
+
+wild-tmr() {
+wild-progbar.sh $1 "$2"
+}
+
+findem() {
+# TODO: figure out what this does or delete
+ls *.* | entr -s "clear; rg $1 $2"
+}
+
+Files () {
+  nvim "$(rg  --files |   fzf --prompt=$PWD/ \
+    --preview-window='up:50%:hidden' \
+    --bind 'ctrl-/:toggle-preview' \
+    --bind 'ctrl-v:execute($EDITOR {})'
+      )"
+
+    }
+
+# using ripgrep combined with preview
+# find-in-file - usage: fif <searchTerm>
+fif () {
+  if [ ! "$#" -gt 0 ]; then echo "Need a string to search for!"; return 1; fi
+  rg --files-with-matches --no-messages "$1" | fzf --preview "highlight -O ansi -l {} 2> /dev/null | rg --colors 'match:bg:yellow' --ignore-case --pretty --context 10 '$1' || rg --ignore-case --pretty --context 10 '$1' {}"
+}
+
+# alternative using ripgrep-all (rga) combined with fzf-tmux preview
+# implementation below makes use of "open" on macOS, which can be replaced by other commands if needed.
+# allows to search in PDFs, E-Books, Office documents, zip, tar.gz, etc. (see https://github.com/phiresky/ripgrep-all)
+# find-in-file - usage: fif <searchTerm> or fif "string with spaces" or fif "regex"
+fifa() {
+    if [ ! "$#" -gt 0 ]; then echo "Need a string to search for!"; return 1; fi
+    local file
+    file="$(rg --max-count=1 --ignore-case --files-with-matches --no-messages "$@" | fzf-tmux +m --preview="rga --ignore-case --pretty --context 10 '"$@"' {}")" && open "$file"
+}
+
+copyq-to () {
+copyq add --  "$(${*})"
+}
+
+watchnrun () {
+ f="$1"; c="$2" &&  find $f  | entr $c $f
+}
+
+view-aliases () {
+  cat $bf/aliases.sh | fzf
+}
+
+wild-editAliases () {
+  nvim "$bf/aliases.sh"
+  source "$bf/aliases.sh"
+}
+
+wilding-journal () {
+  cd "$HOME/personal-journal/personal-journal"
+  nvim "$HOME/personal-journal/personal-journal/${1}"
+  cd -
+}
+
+search-on-reddit () {
+  firefox "https://www.google.com/search?q=${1}+site%3Areddit.com"
+
+}
+
+ask_ollama () {
+  message="$@"
+  echo "${message}"
+  name="$(echo ${message:0:24} | sed s/\ /_/g).md"
+  ollama run hf.co/mradermacher/git-commit-1.5B-GGUF:Q5_K_M  "${message}"  | tee -a "${name}" | glow 
+}
+
+show () {
+	cat "${1}" | glow
+}
+# corpus ======================================================================================
+
+tldw () {
+cd ~/personal-journal/personal-journal/tech && nvim -c "lua require('telescope.builtin').live_grep({search = '$*'})"
+}
+
+tldf () {
+cd ~/personal-journal/personal-journal/tech && nvim -c "lua require('telescope.builtin').find_files({search_file = '$*'})"
+}
+

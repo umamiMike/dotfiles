@@ -1,0 +1,150 @@
+# /home/mike/.config/tmuxinator/hostlogs.yml
+
+name: hostlogs
+root: ~/
+
+# Optional tmux socket
+# socket_name: foo
+
+# Note that the pre and post options have been deprecated and will be replaced by
+# project hooks.
+
+# Project hooks
+
+# Runs on project start, always
+# on_project_start: command
+
+# Run on project start, the first time
+# on_project_first_start: command
+
+# Run on project start, after the first time
+# on_project_restart: command
+
+# Run on project exit ( detaching from tmux session )
+# on_project_exit: command
+
+# Run on project stop
+# on_project_stop: command
+
+# Runs in each window and pane before window/pane specific commands. Useful for setting up interpreter versions.
+# pre_window: rbenv shell 2.0.0-p247
+
+# Pass command line options to tmux. Useful for specifying a different tmux.conf.
+# tmux_options: -f ~/.tmux.mac.conf
+
+# Change the command to call tmux.  This can be used by derivatives/wrappers like byobu.
+# tmux_command: byobu
+
+# Specifies (by name or index) which window will be selected on project startup. If not set, the first window is used.
+# startup_window: editor
+
+# Specifies (by index) which pane of the specified window will be selected on project startup. If not set, the first pane is used.
+# startup_pane: 1
+
+# Controls whether the tmux session should be attached to automatically. Defaults to true.
+# attach: false
+
+windows:
+  - editor:
+      layout: main-vertical
+      # Synchronize all panes of this window, can be enabled before or after the pane commands run.
+      # 'before' represents legacy functionality and will be deprecated in a future release, in favour of 'after'
+      # synchronize: after
+  - dmesg: sudo dmesg -w
+  - logs: tail -f /var/log/syslog
+   
+# alternatives.log
+# alternatives.log.1
+# alternatives.log.2.gz
+# alternatives.log.3.gz
+# alternatives.log.4.gz
+# alternatives.log.5.gz
+# alternatives.log.6.gz
+# alternatives.log.7.gz
+# apport.log
+# apport.log.1
+# apport.log.2.gz
+# apport.log.3.gz
+# apport.log.4.gz
+# apport.log.5.gz
+# apport.log.6.gz
+# apport.log.7.gz
+# apt
+# auth.log
+# auth.log.1
+# auth.log.2.gz
+# auth.log.3.gz
+# auth.log.4.gz
+# boot.log
+# boot.log.1
+# boot.log.2
+# boot.log.3
+# boot.log.4
+# boot.log.5
+# boot.log.6
+# boot.log.7
+# bootstrap.log
+# btmp
+# btmp.1
+# cups
+# dist-upgrade
+# dmesg
+# dmesg.0
+# dmesg.1.gz
+# dmesg.2.gz
+# dmesg.3.gz
+# dmesg.4.gz
+# dpkg.log
+# dpkg.log.1
+# dpkg.log.2.gz
+# dpkg.log.3.gz
+# dpkg.log.4.gz
+# dpkg.log.5.gz
+# dpkg.log.6.gz
+# dpkg.log.7.gz
+# dpkg.log.8.gz
+# faillog
+# firebird
+# fontconfig.log
+# gpu-manager.log
+# hp
+# installer
+# journal
+# kern.log
+# kern.log.1
+# kern.log.2.gz
+# kern.log.3.gz
+# kern.log.4.gz
+# lastlog
+# libvirt
+# minidlna
+# private
+# samba
+# sddm.log
+# syslog
+# syslog.1
+# syslog.2.gz
+# syslog.3.gz
+# syslog.4.gz
+# syslog.6.gz
+# syslog.7.gz
+# ubuntu-advantage.log
+# ubuntu-advantage.log.1
+# ubuntu-advantage.log.2.gz
+# ubuntu-advantage.log.3.gz
+# ubuntu-advantage.log.4.gz
+# ubuntu-advantage.log.5.gz
+# ubuntu-advantage.log.6.gz
+# ubuntu-advantage-timer.log
+# ubuntu-advantage-timer.log.1
+# unattended-upgrades
+# upgrade
+# wtmp
+# Xorg.0.log
+# Xorg.0.log.old
+# Xorg.1.log
+# Xorg.2.log
+# Xorg.3.log
+# Xorg.4.log
+# Xorg.5.log
+# Xorg.5.log.old

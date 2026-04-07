@@ -32,24 +32,32 @@ make sure you install stow
 ```bash
 git clone git@github.com:you/dotfiles.git ~/.dotfiles
 cd ~/.dotfiles
-stow -d ~/.dotfiles -t ~ nvim
-stow -d ~/.dotfiles -t ~ tmux
-# etc
+stow bash
+stow tmuxinator
+stow nvim
+
+# all
+
+stow */
 ```
 
 ---
 
 ## If you add a new tool (e.g. zsh)
 
+Stow's home folder is ~/dotfiles/
+Everything inside a stow package is a mirror image of your home directory. When you run stow tmuxinator, stow walks into ~/dotfiles/tmuxinator/ and says "pretend this folder is ~" — then creates symlinks for everything it finds, preserving the path structure.
+
 ```bash
-mkdir -p ~/.dotfiles/zsh
-mv ~/.zshrc ~/.dotfiles/zsh/.zshrc
-cd ~/.dotfiles
-stow -d ~/.dotfiles -t ~ zsh
-git add .
-git commit -m "add zsh config"
-git push
+
+# create a directory structure  
+mkdir -p ~/.dotfiles/tmuxinator/.config/tmuxinator
+# move the files from the config
+mv ~/.config/tmuxinator/*.yml ~/dotfiles/tmuxinator/.config/tmuxinator/
+# stow the tool
+cd .dotfiles
+stow tmuxinator
+
+
+... commit the dotfiles
 ```
-
----
-
