@@ -38,13 +38,6 @@ vim.o.foldenable = true
 -- Highlight when yanking (copying) text
 --  Try it with `yap` in normal mode
 --  See `:help vim.hl.on_yank()`
-vim.api.nvim_create_autocmd('TextYankPost', {
-  desc = 'Highlight when yanking (copying) text',
-  group = vim.api.nvim_create_augroup('kickstart-highlight-yank', { clear = true }),
-  callback = function()
-    vim.hl.on_yank()
-  end,
-})
 
 -- -- In your init.lua or a utility file
 -- vim.api.nvim_create_autocmd("VimEnter", {
@@ -243,8 +236,7 @@ require('lazy').setup({
       vim.keymap.set('n', ' -', ':sp<cr>', { desc = 'split horizontal' })
       vim.keymap.set('n', '-', ':Ex<CR>', { desc = 'go up' })
       vim.keymap.set('n', '<Space>[', ':norm! I- [ ] <cr> ', { desc = 'convert current line to checklist' })
-      vim.keymap.set('n', '<leader>x', '^y$ocout << " ', { desc = 'convert current line to checklist' })
-      vim.keymap.set('n', '<leader>tt', ':vsplit todo.md<CR>', { desc = 'convert current line to checklist' })
+      vim.keymap.set('n', '<leader>tt', commands.toggle_buf, { desc = 'Toggle todo.md' })
       vim.keymap.set('n', '<leader>te', ':vsplit $HOME/personal-journal/personal-journal/examples/', { desc = 'python examples' })
       -- Slightly advanced example of overriding default behavior and theme
       vim.keymap.set('n', '<leader>/', function()
@@ -404,7 +396,9 @@ require('lazy').setup({
             python = {
               analysis = {
                 autoSearchPaths = true,
+                useLibraryCodeForTypes = true,
               },
+              venvPath = '.',
             },
           },
         },
@@ -535,11 +529,11 @@ require('lazy').setup({
       },
 
       completion = {
-        documentation = { auto_show = true, auto_show_delay_ms = 900 },
+        documentation = { auto_show = true, auto_show_delay_ms = 200 },
       },
 
       sources = {
-        default = { 'lsp', 'path', 'snippets', 'lazydev' },
+        default = { 'lsp', 'path', 'snippets', 'buffer', 'lazydev' },
         providers = {
           lazydev = { module = 'lazydev.integrations.blink', score_offset = 100 },
         },
@@ -554,7 +548,6 @@ require('lazy').setup({
   'navarasu/onedark.nvim',
   { -- You can easily change to a different colorscheme.
     'folke/tokyonight.nvim',
-    priority = 1000, -- Make sure to load this before all the other start plugins.
     config = function()
       ---@diagnostic disable-next-line: missing-fields
       require('tokyonight').setup {
@@ -719,4 +712,7 @@ vim.keymap.set('v', '<leader>p', insert_print_from_visual, { silent = true })
 
 -- Set the Python host executable for Neovim's Python support
 -- WINDOWS DEV
-vim.g.python3_host_prog = '/mnt/c/Users/mikew/AppData/Local/refuge/pipeline/bin/python/python.exe'
+if vim.fn.has 'wsl' == 1 then
+  vim.g.python3_host_prog = '/mnt/c/Users/mikew/AppData/Local/refuge/pipeline/bin/python/python.exe'
+end
+

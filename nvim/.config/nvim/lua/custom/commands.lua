@@ -67,6 +67,16 @@ vim.api.nvim_create_user_command('FindBreakpoints', function()
 		end,
 	}
 end, {})
+
+vim.api.nvim_create_autocmd('TextYankPost', {
+  desc = 'Highlight when yanking (copying) text',
+  group = vim.api.nvim_create_augroup('kickstart-highlight-yank', { clear = true }),
+  callback = function()
+    vim.hl.on_yank()
+  end,
+})
+
+
 local M = {}
 function M.toggle_buf()
 	local bn = 'todo.md'
@@ -122,5 +132,7 @@ function M.extract_to_new_file()
 		end
 	end)
 end
+
+
 return M
 
