@@ -1,7 +1,7 @@
-# /Users/mikew/.config/tmuxinator/wilding.yml
+# /Users/mikew/.config/tmuxinator/--help.yml
 
-name: wilding
-root: ~/personal-journal/
+name: tech
+root: ~/personal-journal/personal-journal/tech/
 
 # Optional tmux socket
 # socket_name: foo
@@ -52,4 +52,4 @@ windows:
       # synchronize: after
       panes:
         - nvim .
-        - claude -c
+        - claude -c 

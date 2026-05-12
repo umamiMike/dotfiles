@@ -152,13 +152,13 @@ export PYENV_ROOT="$HOME/.pyenv"
 eval "$(pyenv init - bash)"
 eval "$(tmuxinator completion zsh)"
 
-function cd() {
-    builtin cd "$@"
-    if [[ "$PWD" == "$HOME/repos/refuge/apps"* ]]; then
-      source "$HOME/repos/refuge/apps/.env"
-    fi
-  }
-
+# function cd() {
+#     builtin cd "$@"
+#     if [[ "$PWD" == "$HOME/repos/refuge/apps"* ]]; then
+#       source "$HOME/repos/refuge/apps/.env"
+#     fi
+#   }
+#
 
 # zprof
 

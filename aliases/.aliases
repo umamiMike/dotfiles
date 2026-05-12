@@ -1,6 +1,6 @@
 #!/bin/sh
-
-alias ls='ls -pG'
+command -v lsd &>/dev/null && alias ls='lsd'
+# alias ls='ls -lAGh'
 alias al="alias | fzf"
 alias calc='bc -l'
 alias clc="fc -ln -1 | awk '{\$1=\$1}1' | xclip -selection clipboard"
@@ -40,6 +40,7 @@ alias grv='git remote -v'
 
 alias gs='git status'
 
+alias vba='. venv/bin/activate'
 # Git alias tab completions (bash + zsh compatible)
 if [ -n "$ZSH_VERSION" ]; then
   # Wrapper approach: rewrite words array so zsh's native _git sees
@@ -277,4 +278,14 @@ cd ~/personal-journal/personal-journal/tech && nvim -c "lua require('telescope.b
 tldf () {
 cd ~/personal-journal/personal-journal/tech && nvim -c "lua require('telescope.builtin').find_files({search_file = '$*'})"
 }
+
+makepdf() { md2pdf $1; open "$(echo $1 | sed 's/\.md/\.pdf/g')"}
+
+tmux-kill-by-name() {tmux ls -F "#S" | fzf -m | xargs -n 1 tmux kill-session -t}
+
+refuge() {
+  local repo="${1:-$(basename $(git rev-parse --show-toplevel 2>/dev/null))}"
+  open "https://dev.rocketchat.app/refuge/${repo}"
+}
+
 

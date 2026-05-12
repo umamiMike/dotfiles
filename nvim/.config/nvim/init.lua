@@ -35,6 +35,7 @@ vim.o.scrolloff = 40 -- Minimal number of screen lines to keep above and below t
 vim.o.confirm = true
 vim.o.foldmethod = 'indent'
 vim.o.foldenable = true
+vim.o.termguicolors = true
 -- Highlight when yanking (copying) text
 --  Try it with `yap` in normal mode
 --  See `:help vim.hl.on_yank()`
@@ -501,14 +502,13 @@ require('lazy').setup({
           -- `friendly-snippets` contains a variety of premade snippets.
           --    See the README about individual language/framework/plugin snippets:
           --    https://github.com/rafamadriz/friendly-snippets
-          -- {
-          --   'rafamadriz/friendly-snippets',
-          --   config = function()
-          --     require('luasnip.loaders.from_vscode').lazy_load()
-          --   end,
-          -- },
+          { 'rafamadriz/friendly-snippets' },
         },
         opts = {},
+        config = function()
+          require('luasnip.loaders.from_vscode').lazy_load()
+          require('luasnip.loaders.from_lua').lazy_load { paths = { vim.fn.stdpath 'config' .. '/lua/snippets' } }
+        end,
       },
       'folke/lazydev.nvim',
     },
@@ -517,9 +517,8 @@ require('lazy').setup({
     opts = {
       keymap = {
         preset = 'enter',
-
-        -- For more advanced Luasnip keymaps (e.g. selecting choice nodes, expansion) see:
-        --    https://github.com/L3MON4D3/LuaSnip?tab=readme-ov-file#keymaps
+        ['<Tab>'] = { 'snippet_forward', 'fallback' },
+        ['<S-Tab>'] = { 'snippet_backward', 'fallback' },
       },
 
       appearance = {
@@ -673,6 +672,22 @@ end, { desc = 'cprev' })
 
 ----- git keymaps
 vim.keymap.set('n', '<leader>go', ':tab Git<CR>', { desc = 'open git in tab' })
+vim.keymap.set('n', '<leader>gr', function()
+  local repo = vim.fn.fnamemodify(vim.fn.system('git rev-parse --show-toplevel'):gsub('\n', ''), ':t')
+  vim.fn.system('open https://dev.rocketchat.app/refuge/' .. repo)
+end, { desc = 'Open repo on [R]efuge' })
+vim.keymap.set('n', '<leader>gR', function()
+  local root = vim.fn.system('git rev-parse --show-toplevel'):gsub('\n', '')
+  local repo = vim.fn.fnamemodify(root, ':t')
+  local commit = vim.fn.system('git rev-parse HEAD'):gsub('\n', '')
+  local filepath = vim.fn.expand('%:p'):gsub(root .. '/', '')
+  local line = vim.fn.line '.'
+  local url = ('https://dev.rocketchat.app/refuge/%s/src/commit/%s/%s#L%d'):format(repo, commit, filepath, line)
+  local md = ('[%s:%d](%s)'):format(filepath, line, url)
+  vim.fn.setreg('+', md)
+  vim.fn.system('open ' .. url)
+  vim.notify('Copied: ' .. md)
+end, { desc = 'Open file+line on [R]efuge' })
 vim.keymap.set('n', '<leader>gc', ':Git commit', { desc = 'Make a git commit' })
 vim.keymap.set('n', '<leader>gca', ':Git commit --amend', { desc = 'Amend the commit message' })
 vim.keymap.set('n', '<leader>ga', ':Git add %<CR>', { desc = 'add current file' })

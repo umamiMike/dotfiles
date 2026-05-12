@@ -1,7 +1,7 @@
-# /Users/mikew/.config/tmuxinator/wilding.yml
+# /Users/mikew/.config/tmuxinator/refuge_custom_nodes.yml
 
-name: wilding
-root: ~/personal-journal/
+name: refuge-comfy-docker
+root: ~/repos/refuge/apps/ComfyUI-Docker
 
 # Optional tmux socket
 # socket_name: foo
@@ -51,5 +51,5 @@ windows:
       # 'before' represents legacy functionality and will be deprecated in a future release, in favour of 'after'
       # synchronize: after
       panes:
-        - nvim .
-        - claude -c
+        - nvim nodes.py
+        - claude -c || claude

@@ -1,7 +1,7 @@
-# /Users/mikew/.config/tmuxinator/wilding.yml
+# /Users/mikew/.config/tmuxinator/project-hub.yml
 
-name: wilding
-root: ~/personal-journal/
+name: project-hub
+root: ~/repos/project-hub/
 
 # Optional tmux socket
 # socket_name: foo
@@ -51,5 +51,5 @@ windows:
       # 'before' represents legacy functionality and will be deprecated in a future release, in favour of 'after'
       # synchronize: after
       panes:
-        - nvim .
-        - claude -c
+      - nvim .
+      - claude -c
