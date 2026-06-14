@@ -196,6 +196,8 @@ function mixtesthead () {
 # various =============================================================
 #
 
+alias td="fd todo.md -1 | xargs nvim"
+
 wild-tmr() {
 wild-progbar.sh $1 "$2"
 }
