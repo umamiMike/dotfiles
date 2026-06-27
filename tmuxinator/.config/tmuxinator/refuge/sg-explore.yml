@@ -1,7 +1,7 @@
-# /Users/mikew/.config/tmuxinator/wilding.yml
+# /Users/mikew/.config/tmuxinator/refuge-explore.yml
 
-name: wilding
-root: ~/personal-journal/
+name: refuge-sq-explorer
+root: ~/repos/refuge/apps/sg-explorer/
 
 # Optional tmux socket
 # socket_name: foo
@@ -27,7 +27,10 @@ root: ~/personal-journal/
 # on_project_stop: command
 
 # Runs in each window and pane before window/pane specific commands. Useful for setting up interpreter versions.
-# pre_window: rbenv shell 2.0.0-p247
+# pre_window:
+#   - export refugepipeline="/Users/mikew/repos/refuge/apps/Pipeline"
+#   - export PYTHONPATH=$PYTHONPATH:${refugepipeline}/Python
+#   - source /Users/mikew/repos/refuge/apps/venv/bin/activate
 
 # Pass command line options to tmux. Useful for specifying a different tmux.conf.
 # tmux_options: -f ~/.tmux.mac.conf
@@ -52,4 +55,4 @@ windows:
       # synchronize: after
       panes:
         - nvim .
-        - claude -c || claude
+        - claude -c
