@@ -118,14 +118,15 @@ setopt completealiases
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 # source ~/.config/wilding/builder.sh
-source ~/.aliases
 source ~/tmuxinator_completion.zsh
+compdef _tmuxinator tmuxinator
+source ~/.aliases
 # source ~/.config/wilding/completions/fzf-completion.zsh
 alias act=". ~/repos/python-sandbox/env/bin/activate"
 export PATH=$PATH:~/repos/byoi/bin
 export PATH=$PATH:~/go/bin
 export PATH=$PATH:~/.config/wilding/shell
-source ~/.config/wilding/shell/wildvid.sh
+[ -f ~/.config/wilding/shell/wildvid.sh ] && source ~/.config/wilding/shell/wildvid.sh
 
 # export PATH="/opt/homebrew/opt/pyside@2/bin:$PATH"
 #alias python="python3"
@@ -148,8 +149,10 @@ alias arm="arch -arm64 zsh --login"
 source <(fzf --zsh)
 
 export PYENV_ROOT="$HOME/.pyenv"
-[[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"
-eval "$(pyenv init - bash)"
+if command -v pyenv &>/dev/null || [[ -d $PYENV_ROOT/bin ]]; then
+  [[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"
+  eval "$(pyenv init -)"
+fi
 eval "$(tmuxinator completion zsh)"
 
 # function cd() {
@@ -162,4 +165,5 @@ eval "$(tmuxinator completion zsh)"
 
 # zprof
 
-. "$HOME/.local/bin/env"
+[ -f "$HOME/.local/bin/env" ] && . "$HOME/.local/bin/env"
+export PATH="$HOME/.local/bin:$PATH"
