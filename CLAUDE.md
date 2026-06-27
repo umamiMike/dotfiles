@@ -9,11 +9,17 @@ Managed with **GNU Stow**. Each top-level directory is a stow package — its co
 **Never edit files in `~/.config` or `~` directly** — always edit in `~/.dotfiles` and let the symlinks propagate.
 
 ```bash
-# Apply a package for the first time
+# Apply a single package
 cd ~/.dotfiles && stow tmux
 
 # Apply all packages at once
 cd ~/.dotfiles && stow */
+
+# Unlink a package
+stow -D nvim
+
+# Preview without applying
+stow -n nvim
 
 # Reload tmux config without restarting
 tmux source-file ~/.dotfiles/tmux/.config/tmux/tmux.conf
@@ -34,16 +40,21 @@ tmux source-file ~/.dotfiles/tmux/.config/tmux/tmux.conf
 
 ## Neovim config
 
-The nvim package lives at `nvim/.config/nvim/` and has its own `CLAUDE.md` — read that for plugin/keymap details. Summary:
+Entry point: `nvim/.config/nvim/init.lua` (kickstart.nvim base). Custom plugins in `nvim/.config/nvim/lua/custom/plugins/`:
+- `init.lua` — fugitive, gruvbox, typescript-tools, code_runner
+- `mini.lua` — mini.nvim (ai, surround, statusline)
+- `codecomp.lua` — CodeCompanion.nvim wired to Claude via the external CLI adapter
 
-- Entry point: `init.lua` (kickstart.nvim base)
-- Custom plugins: `lua/custom/plugins/`
-- Lua formatter: `stylua` (2-space indent, 160-col, single quotes — see `.stylua.toml`)
-- Format buffer: `<leader>f`
+Custom commands in `nvim/.config/nvim/lua/custom/commands.lua`:
+- `:CopyPythonComments` — extract inline comments from selection to clipboard
+- `:FindMarkdown` — Telescope picker for `.md` files
+- `:FindBreakpoints` — find Python `breakpoint()` calls
+
+Lua formatter: `stylua` (2-space indent, 160-col, single quotes — see `.stylua.toml`). Format buffer: `<leader>f`.
 
 ## Shell
 
-`zsh/.zshrc` sources `~/.aliases` (which lives at `aliases/.aliases`). Aliases include short git wrappers (`gs`, `ga`, `gd`, `gl`, etc.), fzf-powered file pickers (`op`, `fif`, `Files`), and Elixir helpers (`mixtest` with fswatch, `mixtesthead`).
+`zsh/.zshrc` sources `~/.aliases` (at `aliases/.aliases`). Aliases include short git wrappers (`gs`, `ga`, `gd`, `gl`, etc.), fzf-powered file pickers (`op`, `fif`, `Files`), and Elixir helpers (`mixtest` with fswatch, `mixtesthead`). NVM is lazy-loaded; pyenv is initialized inline.
 
 ## Tmux
 
@@ -53,3 +64,9 @@ Config at `tmux/.config/tmux/tmux.conf`. Gruvbox-dark statusline, vi copy-mode, 
 - `prefix + r` — reload config
 - `prefix + ^` — new session
 - `M-Right` — select pane right (no prefix)
+
+`keymaps.md` has the full tmux and Neovim keybinding reference — check it before adding new bindings to avoid conflicts.
+
+## Tmuxinator
+
+Templates at `tmuxinator/.config/tmuxinator/`, grouped by project (`delboy/`, `refuge/`) plus a few top-level ones. Follow existing `.yml` patterns when adding new session templates.
