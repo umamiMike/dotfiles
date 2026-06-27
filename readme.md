@@ -43,6 +43,21 @@ stow */
 
 ---
 
+## Pulling changes from another machine
+
+When you `git pull`, symlinks for **existing files** update automatically — they already point into `~/.dotfiles/`, so git updating the file is enough.
+
+You need to re-run stow when a pull introduces **new files or directories** that don't have symlinks yet:
+
+```bash
+# Safe to run any time — only adds missing symlinks, leaves existing ones alone
+git pull && stow */
+```
+
+Making `stow */` a habit after pulling ensures everything stays linked, especially on a machine you haven't used in a while.
+
+---
+
 ## If you add a new tool (e.g. zsh)
 
 Stow's home folder is ~/dotfiles/
