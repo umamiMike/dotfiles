@@ -60,7 +60,9 @@ Making `stow */` a habit after pulling ensures everything stays linked, especial
 
 ## Managing packages with Home Manager
 
-Packages (tools like `fzf`, `rg`, `tmuxinator`, etc.) are declared in `home-manager/.config/home-manager/home.nix`. Home Manager ensures exactly that list is installed — add a package to the list, run the switch command, and it appears; remove it and it's gone.
+Packages (tools like `fzf`, `rg`, `tmuxinator`, etc.) are declared in `home-manager/.config/home-manager/home.nix`. 
+
+Home Manager ensures exactly that list is installed — add a package to the list, run the switch command, and it appears; remove it and it's gone.
 
 ```bash
 # Add or remove packages
@@ -81,6 +83,14 @@ On a new machine, install home-manager first, then stow and switch:
 ```bash
 nix profile install nixpkgs#home-manager
 cd ~/.dotfiles && stow home-manager
+```
+linux
+```
+home-manager switch --flake $HOME/.dotfiles/home-manager/.config/home-manager#mike
+```
+
+linux
+```
 home-manager switch --flake /home/mike/.dotfiles/home-manager/.config/home-manager#mike
 ```
 

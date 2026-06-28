@@ -1,7 +1,7 @@
 { pkgs, ... }: {
   home.packages = with pkgs; [
     # home-manager
-    nodejs_22
+    nodejs_24
     stow
     git-lfs
     diff-so-fancy
@@ -28,5 +28,5 @@
 
   home.sessionVariables = {};
 
-  programs.home-manager.enable = true;
+  # programs.home-manager.enable = true;
 }
