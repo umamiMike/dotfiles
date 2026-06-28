@@ -1,6 +1,6 @@
 { pkgs, ... }: {
   home.packages = with pkgs; [
-    home-manager
+    # home-manager
     nodejs_22
     stow
     git-lfs
