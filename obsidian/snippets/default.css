@@ -1,0 +1,5 @@
+li.task-list-item.is-checked {
+  text-decoration:none;
+  color:var(--text-normal);
+}
+

@@ -69,7 +69,7 @@ Home Manager ensures exactly that list is installed — add a package to the lis
 nvim ~/.dotfiles/home-manager/.config/home-manager/home.nix
 
 # Apply the changes
-home-manager switch --flake /home/mike/.dotfiles/home-manager/.config/home-manager#mike
+home-manager switch --flake ~/.dotfiles/home-manager/.config/home-manager#{username}
 ```
 
 The `flake.lock` pins nixpkgs and home-manager to specific commits. To update to newer package versions:

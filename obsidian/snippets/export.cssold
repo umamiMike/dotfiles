@@ -1,0 +1,6 @@
+ 
+@media print {
+  body {
+  --font-text-size: 12pt !important;
+  }
+ }
