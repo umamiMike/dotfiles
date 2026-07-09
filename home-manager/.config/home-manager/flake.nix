@@ -14,6 +14,10 @@
       pkgs = nixpkgs.legacyPackages.aarch64-darwin;
       modules = [ ./common.nix ./darwin.nix ];
     };
+    homeConfigurations."wsl" = home-manager.lib.homeManagerConfiguration {
+      pkgs = nixpkgs.legacyPackages.aarch64-darwin;
+      modules = [ ./common.nix ];
+    };
 
     homeConfigurations."mike" = home-manager.lib.homeManagerConfiguration {
       pkgs = nixpkgs.legacyPackages.x86_64-linux;
