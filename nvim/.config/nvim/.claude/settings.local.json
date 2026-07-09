@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(fd -H -t d \"nvim-treesitter$\" ~/.local/share/nvim/lazy)",
+      "Read(//home/mikew/.local/share/nvim/lazy/**)"
+    ]
+  }
+}
