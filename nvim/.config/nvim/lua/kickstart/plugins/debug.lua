@@ -144,5 +144,30 @@ return {
         detached = vim.fn.has 'win32' == 0,
       },
     }
+
+    dap.adapters.python = {
+      type = 'server',
+      host = '127.0.0.1',
+      port = 5678,
+    }
+
+    dap.configurations.python = {
+      {
+        type = 'python',
+        request = 'attach',
+        name = 'Attach: 3ds Max debugpy :5678',
+        connect = {
+          host = '127.0.0.1',
+          port = 5678,
+        },
+        justMyCode = false,
+        pathMappings = {
+          {
+            localRoot = '/skynet/PipelineDevRepos/mikew/pipeline_mikew',
+            remoteRoot = '//Skynet/PipelineDevRepos/mikew/pipeline_mikew',
+          },
+        },
+      },
+    }
   end,
 }

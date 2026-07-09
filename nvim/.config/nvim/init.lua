@@ -58,6 +58,13 @@ vim.o.termguicolors = true
 -- })
 
 
+-- in init.lua or a file it sources
+vim.env.PATH = vim.fn.expand("~/bin") .. ":" .. vim.env.PATH
+-- require("gitsigns").setup({
+--   git_cmd = vim.fn.expand("~/bin/git"),
+-- })
+
+
 opt.fillchars = {
   diff = '╱',
 }
@@ -100,6 +107,40 @@ require('lazy').setup({
         changedelete = { text = '~' },
       },
     },
+  },
+
+  { -- Highlight, edit, and navigate code
+    'nvim-treesitter/nvim-treesitter',
+    branch = 'main',
+    lazy = false,
+    build = ':TSUpdate',
+    -- [[ Configure Treesitter ]] See `:help nvim-treesitter-commands`
+    config = function()
+      require('nvim-treesitter').install {
+        'python',
+        'typescript',
+        'javascript',
+        'bash',
+        'c',
+        'diff',
+        'html',
+        'lua',
+        'luadoc',
+        'markdown',
+        'markdown_inline',
+        'query',
+        'vim',
+        'vimdoc',
+      }
+
+      vim.api.nvim_create_autocmd('FileType', {
+        callback = function(ev)
+          if pcall(vim.treesitter.start) then
+            vim.bo[ev.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+          end
+        end,
+      })
+    end,
   },
   { -- Useful plugin to show you pending keybinds.
     'folke/which-key.nvim',
@@ -596,7 +637,7 @@ require('lazy').setup({
     },
   },
 
-  -- require 'kickstart.plugins.debug',
+  require 'kickstart.plugins.debug',
   -- require 'kickstart.plugins.indent_line',
   -- require 'kickstart.plugins.lint',
   require 'kickstart.plugins.autopairs',
@@ -605,6 +646,9 @@ require('lazy').setup({
   --  Uncomment the following line and add your plugins to `lua/custom/plugins/*.lua` to get going.
   { import = 'custom.plugins' },
 }, {
+  git = {
+    cmd = vim.fn.getenv('WSL_DISTRO_NAME') ~= vim.NIL and '/usr/bin/git' or 'git',
+  },
   ui = {
     -- If you are using a Nerd Font: set icons to an empty table which will use the
     -- default lazy.nvim defined Nerd Font icons, otherwise define a unicode icons table
@@ -626,29 +670,7 @@ require('lazy').setup({
   },
 })
 
--- Lua configuration for codecompanion.nvim
-require('codecompanion').setup {
-  integrations = {
-    -- Configure the provider to use an external command
-    external_command = {
-      cmd = 'claude', -- The command to execute (the Claude CLI)
-      args = {}, -- Optional arguments
-      -- Define the environment variables needed for authentication
-      env = {
-        -- This token is managed by the Claude Code CLI.
-        -- You don't usually need to manually set it if the CLI works on its own.
-        -- If you do, you would set an environment variable
-        -- like ANTHROPIC_BEARER_TOKEN (see source 1.4.1).
-      },
-    },
-  },
-  opts = {
-    -- Set the default provider to external_command
-    provider = 'external_command',
-    -- Other general options
-  },
-}
--------   Custom Keymaps
+-- -------   Custom Keymaps
 vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
 -- Diagnostic keymaps
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
