@@ -36,34 +36,8 @@ vim.o.confirm = true
 vim.o.foldmethod = 'indent'
 vim.o.foldenable = true
 vim.o.termguicolors = true
--- Highlight when yanking (copying) text
---  Try it with `yap` in normal mode
---  See `:help vim.hl.on_yank()`
 
--- -- In your init.lua or a utility file
--- vim.api.nvim_create_autocmd("VimEnter", {
---   callback = function()
---     vim.cmd("botright vsplit")
---     vim.cmd("vertical resize 4")
---     local win = vim.api.nvim_get_current_win()
---     local buf = vim.api.nvim_create_buf(false, true)
---     vim.api.nvim_win_set_buf(win, buf)
---     vim.api.nvim_win_set_option(win, "winfixwidth", true)
---     vim.api.nvim_win_set_option(win, "number", false)
---     vim.api.nvim_win_set_option(win, "relativenumber", false)
---     vim.api.nvim_win_set_option(win, "signcolumn", "no")
---     vim.api.nvim_win_set_option(win, "statuscolumn", "")
---     vim.cmd("wincmd p")  -- jump back to previous window
---   end,
--- })
-
-
--- in init.lua or a file it sources
-vim.env.PATH = vim.fn.expand("~/bin") .. ":" .. vim.env.PATH
--- require("gitsigns").setup({
---   git_cmd = vim.fn.expand("~/bin/git"),
--- })
-
+vim.env.PATH = vim.fn.expand '~/bin' .. ':' .. vim.env.PATH
 
 opt.fillchars = {
   diff = '╱',
