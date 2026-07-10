@@ -13,6 +13,7 @@
     ffmpeg
     fzf
     neovim
+	tree-sitter
     git-filter-repo
     go
     lua

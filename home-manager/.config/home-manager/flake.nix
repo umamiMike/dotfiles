@@ -10,7 +10,7 @@
   };
 
   outputs = { nixpkgs, home-manager, ... }: {
-    homeConfigurations."mikew" = home-manager.lib.homeManagerConfiguration {
+    homeConfigurations."darwin" = home-manager.lib.homeManagerConfiguration {
       pkgs = nixpkgs.legacyPackages.aarch64-darwin;
       modules = [ ./common.nix ./darwin.nix ];
     };
