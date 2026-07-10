@@ -272,14 +272,12 @@ require('lazy').setup({
       )
 
       vim.keymap.set('n', '<leader>rh', ':bo term g++ *.cpp -Wall && ./a.out<cr>', { desc = 'build with g++ and run a.out' })
-      vim.keymap.set('n', '<f5>', ':RunFile<cr>', { desc = 'run file' })
-      vim.keymap.set('n', '<s-f5>', ':Neotest run<cr>', { desc = 'run e' })
-      vim.keymap.set('n', '<Space>\\', ':vsp<cr>', { desc = 'split vertical' })
-      vim.keymap.set('n', ' -', ':sp<cr>', { desc = 'split horizontal' })
+      vim.keymap.set('n', '<F5>', ':RunFile<cr>', { desc = 'run file' })
+      vim.keymap.set('n', '<S-F5>', ':Neotest run<cr>', { desc = 'run e' })
+      vim.keymap.set('n', '<leader>\\', ':vsp<cr>', { desc = 'split vertical' })
+      vim.keymap.set('n', '<leader>-', ':sp<cr>', { desc = 'split horizontal' })
       vim.keymap.set('n', '-', ':Ex<CR>', { desc = 'go up' })
-      vim.keymap.set('n', '<Space>[', ':norm! I- [ ] <cr> ', { desc = 'convert current line to checklist' })
-      vim.keymap.set('n', '<leader>tt', commands.toggle_buf, { desc = 'Toggle todo.md' })
-      vim.keymap.set('n', '<leader>te', ':vsplit $HOME/personal-journal/personal-journal/examples/', { desc = 'python examples' })
+      vim.keymap.set('n', '<leader>[', ':norm! I- [ ] <cr> ', { desc = 'convert current line to checklist' })
       -- Slightly advanced example of overriding default behavior and theme
       vim.keymap.set('n', '<leader>/', function()
         -- You can pass additional configuration to Telescope to change the theme, layout, etc.
@@ -634,7 +632,7 @@ require('lazy').setup({
 })
 
 -- -------   Custom Keymaps
-vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
+vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>', { desc = 'Clear search highlight' })
 -- Diagnostic keymaps
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
 vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' })
@@ -656,30 +654,11 @@ vim.keymap.set('n', '<C-k>', function()
   vim.cmd 'cprev'
 end, { desc = 'cprev' })
 
------ git keymaps
-vim.keymap.set('n', '<leader>go', ':tab Git<CR>', { desc = 'open git in tab' })
-vim.keymap.set('n', '<leader>gr', function()
-  local repo = vim.fn.fnamemodify(vim.fn.system('git rev-parse --show-toplevel'):gsub('\n', ''), ':t')
-  vim.fn.system('open https://dev.rocketchat.app/refuge/' .. repo)
-end, { desc = 'Open repo on [R]efuge' })
-vim.keymap.set('n', '<leader>gR', function()
-  local root = vim.fn.system('git rev-parse --show-toplevel'):gsub('\n', '')
-  local repo = vim.fn.fnamemodify(root, ':t')
-  local commit = vim.fn.system('git rev-parse HEAD'):gsub('\n', '')
-  local filepath = vim.fn.expand('%:p'):gsub(root .. '/', '')
-  local line = vim.fn.line '.'
-  local url = ('https://dev.rocketchat.app/refuge/%s/src/commit/%s/%s#L%d'):format(repo, commit, filepath, line)
-  local md = ('[%s:%d](%s)'):format(filepath, line, url)
-  vim.fn.setreg('+', md)
-  vim.fn.system('open ' .. url)
-  vim.notify('Copied: ' .. md)
-end, { desc = 'Open file+line on [R]efuge' })
-vim.keymap.set('n', '<leader>gc', ':Git commit', { desc = 'Make a git commit' })
-vim.keymap.set('n', '<leader>gca', ':Git commit --amend', { desc = 'Amend the commit message' })
-vim.keymap.set('n', '<leader>ga', ':Git add %<CR>', { desc = 'add current file' })
+require 'custom.git'
 vim.keymap.set('n', 'td', commands.toggle_buf, { desc = 'Toggle todo.md' })
 vim.keymap.set('n', '<leader>o', function()
-vim.fn.system "tmux split-window -h 'claude'" end, { noremap = true, silent = true, desc = 'Open Claude Code in tmux split' })
+  vim.fn.system "tmux split-window -h 'claude'"
+end, { noremap = true, silent = true, desc = 'Open Claude Code in tmux split' })
 
 ------------ python specific functions
 local function insert_print_from_word()
@@ -707,9 +686,9 @@ local function insert_print_from_visual()
   vim.api.nvim_put({ 'print("' .. text .. ': ", ' .. text .. ')' }, 'l', true, true)
 end
 
-vim.keymap.set('n', '<leader>p', insert_print_from_word)
+vim.keymap.set('n', '<leader>p', insert_print_from_word, { desc = 'Insert print() for word under cursor' })
 -- keymap for visual mode
-vim.keymap.set('v', '<leader>p', insert_print_from_visual, { silent = true })
+vim.keymap.set('v', '<leader>p', insert_print_from_visual, { silent = true, desc = 'Insert print() for selection' })
 
 -- Set the Python host executable for Neovim's Python support
 -- WINDOWS DEV

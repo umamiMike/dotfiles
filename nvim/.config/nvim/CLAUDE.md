@@ -50,7 +50,7 @@ Leader key is `<Space>`.
 |--------|--------|
 | `<leader>sf` | Telescope find files |
 | `<leader>sg` | Live grep |
-| `<leader>tt` | Open `todo.md` in vsplit |
+| `td` | Open `todo.md` in vsplit |
 | `<leader>lr` | LSP rename |
 | `<leader>f` | Format buffer |
 | `<leader>go` | Open fugitive in tab |
