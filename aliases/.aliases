@@ -26,6 +26,7 @@ alias gcb='git checkout -b'
 alias gca='git commit --amend'
 alias gcme='git commit -m '
 alias gd='git diff'
+alias gdh='git diff HEAD~1' # diff the last commit
 
 alias gdno='git diff --name-only'
 alias gl='git log'
@@ -235,6 +236,49 @@ fifa() {
 
 copyq-to () {
 copyq add --  "$(${*})"
+}
+
+# flatten a directory tree into a single dest dir, prefixing each filename
+# with its parent dir name to avoid collisions
+# usage: flatcopy <search-dir> <dest-dir> [fd-args...]
+# ex: flatcopy foo new/location -e md   # foo/bar/baz.md -> new/location/bar-baz.md
+flatcopy () {
+  if [ "$#" -lt 2 ]; then
+    echo "usage: flatcopy <search-dir> <dest-dir> [fd-args...]"
+    return 1
+  fi
+  local search_dir="$1" dest_dir="$2"
+  shift 2
+
+  local -a matches
+  while IFS= read -r file; do
+    matches+=("$file")
+  done < <(fd "$@" . "$search_dir")
+
+  if [ "${#matches[@]}" -eq 0 ]; then
+    echo "no matching files"
+    return 1
+  fi
+
+  local file dir
+  echo "The following files would be copied to $dest_dir:"
+  for file in "${matches[@]}"; do
+    dir=$(basename "$(dirname "$file")")
+    echo "  $file -> $dest_dir/${dir}-$(basename "$file")"
+  done
+
+  printf 'Proceed? [y/N] '
+  read -r confirm
+  case "$confirm" in
+    y|Y) ;;
+    *) echo "Aborted"; return 1 ;;
+  esac
+
+  mkdir -p "$dest_dir"
+  for file in "${matches[@]}"; do
+    dir=$(basename "$(dirname "$file")")
+    cp "$file" "$dest_dir/${dir}-$(basename "$file")"
+  done
 }
 
 watchnrun () {
