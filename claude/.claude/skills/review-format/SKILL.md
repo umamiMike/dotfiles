@@ -1,3 +1,8 @@
+---
+name: review-format
+description: Output formatting convention for any review-style result — code review, /python-review, /code-review, bug/improvement lists, ad-hoc "review this" requests, or anything else that produces a list of findings. Load when about to present review findings so they're structured consistently.
+---
+
 # Review output format
 
 Applies to any review-style output: code review, /python-review, /code-review, bugs/improvements

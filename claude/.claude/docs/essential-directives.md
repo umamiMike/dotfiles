@@ -6,4 +6,4 @@
 
 ### documenting your work
 - when creating mermaid charts, avoid using <br/> tags, they seem to break 
-- to help the user clearly understand your review see [`review-format.md`](review-format.md)
+- review output formatting is handled by the `review-format` skill
