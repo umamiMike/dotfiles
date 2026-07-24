@@ -36,6 +36,9 @@ alias gp='git push'
 alias gpo='git push origin'
 alias gpsu='git push --set-upstream origin $(git branch --show-current)'
 
+alias gpu='git pull'
+alias gpuo='git pull origin'
+
 alias grst='git restore --staged'  # use when accidentally git added something
 alias grv='git remote -v'
 
