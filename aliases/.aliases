@@ -200,7 +200,11 @@ function mixtesthead () {
 # various =============================================================
 #
 
-alias td="fd todo.md -1 | xargs nvim"
+
+td() {
+	todo_path=$(fd todo.md -1)
+	[ -e  "${todo_path}" ] && nvim "${todo_path}" || nvim ./todo.md
+}
 
 wild-tmr() {
 wild-progbar.sh $1 "$2"
