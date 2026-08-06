@@ -232,7 +232,6 @@ function mixtesthead () {
 # various =============================================================
 #
 
-
 # open todo.md in cwd (or fd-found todo.md)
 td() {
 	todo_path=$(fd todo.md -1)
