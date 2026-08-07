@@ -19,6 +19,8 @@
     lua
     hugo
     google-cloud-sdk
+    cabal-install
+    (haskellPackages.ghcWithPackages (p: with p; [ text containers ]))
     # nmap
     tmux
     tmuxinator
