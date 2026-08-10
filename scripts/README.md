@@ -52,13 +52,19 @@ composes with `rcfind`, `rcplay`, or any other producer of remote paths.
    opens it in MeshLab, waits for you to close it, then deletes the temp
    file immediately. If the STL is over 100 MB, it asks
    `download to view? [y/N]` first, since that's a real local download.
-3. After each file, prompts:
+3. For anything else — since `rcfind` can pipe in any file type, not just
+   the curated media/STL set — downloads to a temp file and opens it with
+   the OS default handler (`open` on macOS, `xdg-open` on Linux, `cmd.exe
+   /c start` on Windows/WSL), then waits for `Enter` before deleting the
+   temp file. If no opener is found, it prints an error and skips viewing
+   for that file — you still get the rename/delete/quit prompt.
+4. After each file, prompts:
    - `r` — rename (enter the new name without an extension; spaces become
      `-`; the original extension is kept)
    - `d` — delete on the remote, with immediate size feedback
    - `q` — quit the whole review, skipping any remaining files
    - Enter — continue to the next file
-4. On exit (including via `q`), prints a summary: files deleted and total
+5. On exit (including via `q`), prints a summary: files deleted and total
    space freed.
 
 Since stdin is used for the incoming file list, mpv and the rename/delete
@@ -115,24 +121,30 @@ everything selected gone. Composes with `rcfind` or any other producer of
 ## rcmove / rccopy
 
 ```
-rcfind <remote:path> | rcmove [-l] [--to remote:directory]
-rcfind <remote:path> | rccopy [-l] [--to remote:directory]
+rcfind <remote:path> | rcmove [-l | -r] [--to remote:directory]
+rcfind <remote:path> | rccopy [-l | -r] [--to remote:directory]
 ```
 
 Identical behavior — `rcmove` uses `rclone moveto`, `rccopy` uses `rclone
 copyto`. Composes with `rcfind` or any other producer of `remote:path`
-lines.
+lines. Exactly one of `-l`, `-r`, `--to` applies (or none, for the default).
 
-- **No flag, or `-l`** (explicit alias for the default): lists every
-  directory on the *same remote* as the piped-in files (`rclone lsf
-  --dirs-only -R`) and opens a single-select fzf (`.` represents the
-  remote's root) to pick exactly one destination. Picking it completes the
-  move/copy — there's no separate confirmation prompt beyond the fzf
-  selection itself.
-- **`--to remote:directory`** (or `--to=remote:directory`): skips the
-  picker and goes straight there — the only way to move/copy **across
-  remotes**, since the interactive picker only browses the source's own
-  remote.
+- **No flag** (default): lists every directory on the *same remote* as the
+  piped-in files (`rclone lsf --dirs-only -R`) and opens a single-select
+  fzf (`.` represents the remote's root) to pick exactly one destination.
+- **`-l`**: same single-select fzf picker, but scanning local directories
+  under the current working directory instead (`find . -type d`, `.`
+  represents the cwd itself) — for downloading straight to your machine.
+- **`-r`**: first a single-select fzf over `rclone listremotes` (any
+  configured remote, not just the source's), then the same directory
+  picker as the default, scoped to whichever remote you picked — for
+  moving/copying across remotes interactively.
+- **`--to remote:directory`** (or `--to=remote:directory`, also accepts a
+  plain local path): skips both pickers and goes straight there — useful
+  when you already know the exact destination and don't want to browse.
+
+Picking a directory (or supplying `--to`) completes the move/copy — no
+separate confirmation prompt beyond that selection.
 
 Each file lands at `<destination>/<original-basename>`, with per-file
 feedback and a final success/fail summary:

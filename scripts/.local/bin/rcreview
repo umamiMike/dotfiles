@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
-# Stream-review remote files piped in on stdin (one full remote:path per
-# line, e.g. from rcfind or rcplay) via mpv, then rename/delete/skip each
-# on the remote. No local save. Prints a deleted-space summary at the end.
+# Review remote files piped in on stdin (one full remote:path per line, e.g.
+# from rcfind or rcplay): media streams via mpv, STL downloads to MeshLab,
+# anything else downloads to the OS default app - then rename/delete/skip
+# each on the remote. Prints a deleted-space summary at the end.
 #
 # Usage: rcfind <remote:path> | rcreview
 #        rcplay <remote:path>   (uses this internally)
@@ -57,6 +58,29 @@ except Exception:
     print(0)'
 }
 
+open_with_os_default() {
+  local f="$1"
+  if command -v open >/dev/null; then
+    open "$f"
+  elif command -v xdg-open >/dev/null; then
+    xdg-open "$f" >/dev/null 2>&1
+  elif command -v cmd.exe >/dev/null; then
+    cmd.exe /c start "" "$f" >/dev/null 2>&1
+  else
+    return 1
+  fi
+}
+
+MEDIA_EXTENSIONS=(mp4 mkv mov avi webm m4v mp3 flac wav ogg m4a jpg jpeg png gif webp bmp tiff heic)
+
+is_media_ext() {
+  local ext="$1" candidate
+  for candidate in "${MEDIA_EXTENSIONS[@]}"; do
+    [[ "$ext" == "$candidate" ]] && return 0
+  done
+  return 1
+}
+
 STL_CONFIRM_THRESHOLD=$(( 100 * 1024 * 1024 ))
 
 DELETED_BYTES=0
@@ -105,9 +129,22 @@ for f in "${FILES[@]}"; do
     else
       echo "Skipped viewing: $f"
     fi
-  else
+  elif is_media_ext "$ext_lower"; then
     echo "Playing: $f"
     mpv --image-display-duration=inf "http://127.0.0.1:$PORT/$(urlencode "$f")" < /dev/tty
+  else
+    tmpfile=$(mktemp "${TMPDIR:-/tmp}/rcreview.XXXXXX.${ext_lower}")
+    echo "Downloading: $f"
+    if rclone copyto "$full" "$tmpfile" 2>/dev/null; then
+      if open_with_os_default "$tmpfile"; then
+        read -r -p "Press Enter after closing the file to continue: " _ < /dev/tty
+      else
+        echo "rcreview: no OS file opener found (tried open, xdg-open, cmd.exe) - skipping $f" >&2
+      fi
+    else
+      echo "rcreview: failed to download $f" >&2
+    fi
+    rm -f "$tmpfile"
   fi
 
   read -r -p "[r]ename / [d]elete / [q]uit / [Enter]=continue: " action < /dev/tty

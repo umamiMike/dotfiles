@@ -1,9 +1,11 @@
 #!/usr/bin/env bash
 # Move remote files piped in on stdin (one full remote:path per line, e.g.
 # from rcfind) to a destination directory - picked interactively from an
-# fzf list of directories on the same remote, or given explicitly via --to.
+# fzf list of directories on the same remote (default), the local
+# filesystem under the cwd (-l), any configured remote (-r), or given
+# explicitly via --to.
 #
-# Usage: rcfind <remote:path> | rcmove [-l] [--to remote:directory]
+# Usage: rcfind <remote:path> | rcmove [-l | -r] [--to remote:directory]
 
 set -uo pipefail
 
@@ -13,7 +15,11 @@ MODE="list"
 while [[ $# -gt 0 ]]; do
   case "$1" in
     -l)
-      MODE="list"
+      MODE="local"
+      shift
+      ;;
+    -r)
+      MODE="remote"
       shift
       ;;
     --to)
@@ -27,7 +33,7 @@ while [[ $# -gt 0 ]]; do
       shift
       ;;
     *)
-      echo "Usage: rcmove [-l] [--to remote:directory]" >&2
+      echo "Usage: rcmove [-l | -r] [--to remote:directory]" >&2
       exit 1
       ;;
   esac
@@ -63,6 +69,60 @@ if [[ "$MODE" == "to" ]]; then
     exit 1
   fi
   DEST_DIR="${DEST%/}"
+elif [[ "$MODE" == "local" ]]; then
+  command -v fzf >/dev/null || { echo "rcmove: 'fzf' not found" >&2; exit 1; }
+
+  mapfile -t DIRS < <(find . -mindepth 1 -type d 2>/dev/null | sed 's#^\./##')
+
+  DIR_OPTIONS=(".")
+  DIR_OPTIONS+=("${DIRS[@]}")
+
+  SELECTED_DIR=$(printf '%s\n' "${DIR_OPTIONS[@]}" | fzf --prompt="local destination> ")
+
+  if [[ -z "${SELECTED_DIR:-}" ]]; then
+    echo "rcmove: no directory selected" >&2
+    exit 0
+  fi
+
+  if [[ "$SELECTED_DIR" == "." ]]; then
+    DEST_DIR="$(pwd)"
+  else
+    DEST_DIR="$(pwd)/${SELECTED_DIR%/}"
+  fi
+elif [[ "$MODE" == "remote" ]]; then
+  command -v fzf >/dev/null || { echo "rcmove: 'fzf' not found" >&2; exit 1; }
+
+  mapfile -t REMOTES < <(rclone listremotes 2>/dev/null)
+
+  if [[ ${#REMOTES[@]} -eq 0 ]]; then
+    echo "rcmove: no rclone remotes configured" >&2
+    exit 1
+  fi
+
+  SELECTED_REMOTE=$(printf '%s\n' "${REMOTES[@]}" | fzf --prompt="remote> ")
+
+  if [[ -z "${SELECTED_REMOTE:-}" ]]; then
+    echo "rcmove: no remote selected" >&2
+    exit 0
+  fi
+
+  mapfile -t DIRS < <(rclone lsf "$SELECTED_REMOTE" --dirs-only -R 2>/dev/null)
+
+  DIR_OPTIONS=(".")
+  DIR_OPTIONS+=("${DIRS[@]}")
+
+  SELECTED_DIR=$(printf '%s\n' "${DIR_OPTIONS[@]}" | fzf --prompt="destination> ")
+
+  if [[ -z "${SELECTED_DIR:-}" ]]; then
+    echo "rcmove: no directory selected" >&2
+    exit 0
+  fi
+
+  if [[ "$SELECTED_DIR" == "." ]]; then
+    DEST_DIR="${SELECTED_REMOTE%/}"
+  else
+    DEST_DIR="${SELECTED_REMOTE}${SELECTED_DIR%/}"
+  fi
 else
   command -v fzf >/dev/null || { echo "rcmove: 'fzf' not found" >&2; exit 1; }
 
