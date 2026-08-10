@@ -1,0 +1,60 @@
+#!/usr/bin/env bash
+# List and select files on an rclone remote, print the selected full remote
+# paths to stdout for piping into another command (copy, move, etc.).
+#
+# Usage: rcfind [filter] <remote:path>
+
+set -uo pipefail
+
+FZF_BIND="tab:toggle+up,ctrl-a:select-all"
+
+usage() {
+  echo "Usage: rcfind [filter] <remote:path>" >&2
+  exit 1
+}
+
+if [[ $# -eq 1 ]]; then
+  FILTER=""
+  BASE="${1%/}"
+elif [[ $# -eq 2 ]]; then
+  FILTER="$1"
+  BASE="${2%/}"
+else
+  usage
+fi
+
+for bin in rclone fzf; do
+  command -v "$bin" >/dev/null || { echo "rcfind: '$bin' not found" >&2; exit 1; }
+done
+
+full_remote_path() {
+  local rel="$1"
+  if [[ "$BASE" == *: ]]; then
+    echo "${BASE}${rel}"
+  else
+    echo "${BASE}/${rel}"
+  fi
+}
+
+INCLUDE_ARGS=()
+if [[ -n "$FILTER" ]]; then
+  INCLUDE_ARGS=(--include "*${FILTER}*")
+fi
+
+mapfile -t ALL_PATHS < <(rclone lsf "$BASE" --files-only -R "${INCLUDE_ARGS[@]}" 2>/dev/null)
+
+if [[ ${#ALL_PATHS[@]} -eq 0 ]]; then
+  echo "rcfind: no files found under $BASE" >&2
+  exit 0
+fi
+
+mapfile -t SELECTED_FILES < <(printf '%s\n' "${ALL_PATHS[@]}" | fzf -m --bind "$FZF_BIND" --prompt="files> ")
+
+if [[ ${#SELECTED_FILES[@]} -eq 0 ]]; then
+  echo "rcfind: no files selected" >&2
+  exit 0
+fi
+
+for f in "${SELECTED_FILES[@]}"; do
+  full_remote_path "$f"
+done

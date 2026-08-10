@@ -1,0 +1,150 @@
+#!/usr/bin/env bash
+# Stream-review remote files piped in on stdin (one full remote:path per
+# line, e.g. from rcfind or rcplay) via mpv, then rename/delete/skip each
+# on the remote. No local save. Prints a deleted-space summary at the end.
+#
+# Usage: rcfind <remote:path> | rcreview
+#        rcplay <remote:path>   (uses this internally)
+
+set -uo pipefail
+
+for bin in rclone mpv curl python3; do
+  command -v "$bin" >/dev/null || { echo "rcreview: '$bin' not found" >&2; exit 1; }
+done
+
+mapfile -t INPUT_PATHS
+
+if [[ ${#INPUT_PATHS[@]} -eq 0 ]]; then
+  echo "rcreview: no input" >&2
+  exit 0
+fi
+
+REMOTE="${INPUT_PATHS[0]%%:*}:"
+
+FILES=()
+for p in "${INPUT_PATHS[@]}"; do
+  [[ -n "$p" ]] || continue
+  if [[ "$p" != "$REMOTE"* ]]; then
+    echo "rcreview: skipping '$p' (different remote than $REMOTE)" >&2
+    continue
+  fi
+  FILES+=("${p#"$REMOTE"}")
+done
+
+if [[ ${#FILES[@]} -eq 0 ]]; then
+  echo "rcreview: no usable input" >&2
+  exit 0
+fi
+
+urlencode() {
+  python3 -c 'import urllib.parse,sys; print(urllib.parse.quote(sys.argv[1], safe="/"))' "$1"
+}
+
+human_size() {
+  awk -v b="$1" 'BEGIN {
+    units["0"]="B"; units["1"]="KB"; units["2"]="MB"; units["3"]="GB"; units["4"]="TB"
+    u=0
+    while (b >= 1024 && u < 4) { b /= 1024; u++ }
+    printf "%.1f %s", b, units[u]
+  }'
+}
+
+file_size() {
+  rclone size "$1" --json 2>/dev/null | python3 -c 'import json,sys
+try:
+    print(json.load(sys.stdin).get("bytes", 0))
+except Exception:
+    print(0)'
+}
+
+STL_CONFIRM_THRESHOLD=$(( 100 * 1024 * 1024 ))
+
+DELETED_BYTES=0
+DELETED_COUNT=0
+
+PORT=$(( (RANDOM % 20000) + 20000 ))
+rclone serve http "$REMOTE" --addr "127.0.0.1:$PORT" >/dev/null 2>&1 &
+SERVE_PID=$!
+
+cleanup() {
+  kill "$SERVE_PID" 2>/dev/null
+  wait "$SERVE_PID" 2>/dev/null
+}
+trap cleanup EXIT INT TERM
+
+for _ in $(seq 1 20); do
+  curl -s -o /dev/null "http://127.0.0.1:$PORT/" && break
+  sleep 0.25
+done
+
+for f in "${FILES[@]}"; do
+  full="${REMOTE}${f}"
+  ext_lower=$(printf '%s' "${f##*.}" | tr '[:upper:]' '[:lower:]')
+
+  if [[ "$ext_lower" == "stl" ]]; then
+    size=$(file_size "$full")
+    proceed=1
+    if [[ "$size" -gt "$STL_CONFIRM_THRESHOLD" ]]; then
+      read -r -p "This STL is $(human_size "$size") - download to view? [y/N]: " confirm < /dev/tty
+      case "$confirm" in
+        y|Y) proceed=1 ;;
+        *) proceed=0 ;;
+      esac
+    fi
+    if [[ "$proceed" -eq 1 ]]; then
+      tmpfile=$(mktemp "${TMPDIR:-/tmp}/rcreview.XXXXXX.stl")
+      echo "Downloading: $f"
+      if rclone copyto "$full" "$tmpfile" 2>/dev/null; then
+        if ! open -a MeshLab -W "$tmpfile"; then
+          echo "rcreview: failed to open MeshLab (is it installed? brew install --cask meshlab)" >&2
+        fi
+      else
+        echo "rcreview: failed to download $f" >&2
+      fi
+      rm -f "$tmpfile"
+    else
+      echo "Skipped viewing: $f"
+    fi
+  else
+    echo "Playing: $f"
+    mpv --image-display-duration=inf "http://127.0.0.1:$PORT/$(urlencode "$f")" < /dev/tty
+  fi
+
+  read -r -p "[r]ename / [d]elete / [q]uit / [Enter]=continue: " action < /dev/tty
+  case "$action" in
+    q|Q)
+      break
+      ;;
+    r|R)
+      base=$(basename -- "$f")
+      ext="${base##*.}"
+      read -r -p "New name (no extension): " newname < /dev/tty
+      newname="${newname// /-}.${ext}"
+      dir=$(dirname -- "$f")
+      if [[ "$dir" == "." ]]; then
+        newrel="$newname"
+      else
+        newrel="$dir/$newname"
+      fi
+      rclone moveto "${REMOTE}${f}" "${REMOTE}${newrel}"
+      ;;
+    d|D)
+      full="${REMOTE}${f}"
+      size=$(file_size "$full")
+      if rclone deletefile "$full"; then
+        DELETED_BYTES=$(( DELETED_BYTES + size ))
+        DELETED_COUNT=$(( DELETED_COUNT + 1 ))
+        echo "Deleted: $f ($(human_size "$size"))"
+      else
+        echo "Failed to delete: $f" >&2
+      fi
+      ;;
+    *)
+      ;;
+  esac
+done
+
+if [[ $DELETED_COUNT -gt 0 ]]; then
+  echo
+  echo "Deleted $DELETED_COUNT file(s), freed $(human_size "$DELETED_BYTES")."
+fi

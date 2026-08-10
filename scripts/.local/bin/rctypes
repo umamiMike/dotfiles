@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+# List every file extension present under an rclone remote path, multiselect
+# via fzf, print the selected extensions to stdout.
+#
+# Usage: rctypes <remote:path>
+
+set -uo pipefail
+
+FZF_BIND="tab:toggle+up,ctrl-a:select-all"
+
+usage() {
+  echo "Usage: rctypes <remote:path>" >&2
+  exit 1
+}
+
+[[ $# -eq 1 ]] || usage
+
+for bin in rclone fzf; do
+  command -v "$bin" >/dev/null || { echo "rctypes: '$bin' not found" >&2; exit 1; }
+done
+
+BASE="${1%/}"
+
+mapfile -t ALL_PATHS < <(rclone lsf "$BASE" --files-only -R 2>/dev/null)
+
+if [[ ${#ALL_PATHS[@]} -eq 0 ]]; then
+  echo "rctypes: no files found under $BASE" >&2
+  exit 0
+fi
+
+mapfile -t ALL_EXT < <(printf '%s\n' "${ALL_PATHS[@]}" | awk -F. 'NF>1 {print $NF}' | sort -u)
+
+if [[ ${#ALL_EXT[@]} -eq 0 ]]; then
+  echo "rctypes: no file extensions found under $BASE" >&2
+  exit 0
+fi
+
+mapfile -t SELECTED_EXT < <(printf '%s\n' "${ALL_EXT[@]}" | fzf -m --bind "$FZF_BIND" --prompt="types> ")
+
+if [[ ${#SELECTED_EXT[@]} -eq 0 ]]; then
+  echo "rctypes: no types selected" >&2
+  exit 0
+fi
+
+printf '%s\n' "${SELECTED_EXT[@]}"
