@@ -8,7 +8,10 @@ scripts/.local/bin/
 ├── rcplay    # select media on a remote, then hand off to rcreview
 ├── rcfind    # select remote files, print their paths for piping elsewhere
 ├── rctypes   # list extensions present on a remote, print the selected ones
-└── rcreview  # play/rename/delete/skip files piped in on stdin
+├── rcreview  # play/rename/delete/skip files piped in on stdin
+├── rcdelete  # bulk-delete files piped in on stdin, no per-file review
+├── rcmove    # move files piped in on stdin to a chosen/given directory
+└── rccopy    # copy files piped in on stdin to a chosen/given directory
 ```
 
 Both require `rclone`, `fzf`, `mpv`/`curl`/`python3` on PATH, and an rclone
@@ -91,6 +94,52 @@ Lists every file extension actually present under `<remote:path>` (not a
 hardcoded list) and multiselects via fzf. Prints the selected extensions to
 stdout, one per line — useful for scoping down before an `rcfind`/`rcplay`
 pass, or piping into your own filtering.
+
+## rcdelete
+
+```
+rcfind <remote:path> | rcdelete [-f|--force]
+```
+
+Bulk delete with no per-file review — for when you already know you want
+everything selected gone. Composes with `rcfind` or any other producer of
+`remote:path` lines, same as `rcreview`.
+
+1. Looks up each input file's size and sums the total.
+2. Prompts once: `About to delete N file(s), totaling X — proceed? [y/N]`
+   — skip this with `-f`/`--force` (mirrors `rm -f`).
+3. Deletes each, printing `Deleted: path (size)`; failures are reported but
+   don't stop the rest.
+4. Prints a final summary: files deleted and total space freed.
+
+## rcmove / rccopy
+
+```
+rcfind <remote:path> | rcmove [-l] [--to remote:directory]
+rcfind <remote:path> | rccopy [-l] [--to remote:directory]
+```
+
+Identical behavior — `rcmove` uses `rclone moveto`, `rccopy` uses `rclone
+copyto`. Composes with `rcfind` or any other producer of `remote:path`
+lines.
+
+- **No flag, or `-l`** (explicit alias for the default): lists every
+  directory on the *same remote* as the piped-in files (`rclone lsf
+  --dirs-only -R`) and opens a single-select fzf (`.` represents the
+  remote's root) to pick exactly one destination. Picking it completes the
+  move/copy — there's no separate confirmation prompt beyond the fzf
+  selection itself.
+- **`--to remote:directory`** (or `--to=remote:directory`): skips the
+  picker and goes straight there — the only way to move/copy **across
+  remotes**, since the interactive picker only browses the source's own
+  remote.
+
+Each file lands at `<destination>/<original-basename>`, with per-file
+feedback and a final success/fail summary:
+```
+rcfind gdrive_hey:Videos | rcmove --to gdrive-mwc:Archive
+rcfind stl gdrive_hey:Models | rccopy
+```
 
 ## fzf conventions
 

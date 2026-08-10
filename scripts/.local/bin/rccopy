@@ -1,0 +1,109 @@
+#!/usr/bin/env bash
+# Copy remote files piped in on stdin (one full remote:path per line, e.g.
+# from rcfind) to a destination directory - picked interactively from an
+# fzf list of directories on the same remote, or given explicitly via --to.
+#
+# Usage: rcfind <remote:path> | rccopy [-l] [--to remote:directory]
+
+set -uo pipefail
+
+DEST=""
+MODE="list"
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -l)
+      MODE="list"
+      shift
+      ;;
+    --to)
+      DEST="${2:-}"
+      MODE="to"
+      shift 2
+      ;;
+    --to=*)
+      DEST="${1#--to=}"
+      MODE="to"
+      shift
+      ;;
+    *)
+      echo "Usage: rccopy [-l] [--to remote:directory]" >&2
+      exit 1
+      ;;
+  esac
+done
+
+command -v rclone >/dev/null || { echo "rccopy: 'rclone' not found" >&2; exit 1; }
+
+mapfile -t INPUT_PATHS
+
+FILES=()
+for p in "${INPUT_PATHS[@]}"; do
+  [[ -n "$p" ]] || continue
+  FILES+=("$p")
+done
+
+if [[ ${#FILES[@]} -eq 0 ]]; then
+  echo "rccopy: no input" >&2
+  exit 0
+fi
+
+dest_path() {
+  local dir="$1" base="$2"
+  if [[ "$dir" == *: ]]; then
+    echo "${dir}${base}"
+  else
+    echo "${dir}/${base}"
+  fi
+}
+
+if [[ "$MODE" == "to" ]]; then
+  if [[ -z "$DEST" ]]; then
+    echo "rccopy: --to requires a remote:directory value" >&2
+    exit 1
+  fi
+  DEST_DIR="${DEST%/}"
+else
+  command -v fzf >/dev/null || { echo "rccopy: 'fzf' not found" >&2; exit 1; }
+
+  REMOTE="${FILES[0]%%:*}:"
+
+  mapfile -t DIRS < <(rclone lsf "$REMOTE" --dirs-only -R 2>/dev/null)
+
+  DIR_OPTIONS=(".")
+  DIR_OPTIONS+=("${DIRS[@]}")
+
+  SELECTED_DIR=$(printf '%s\n' "${DIR_OPTIONS[@]}" | fzf --prompt="destination> ")
+
+  if [[ -z "${SELECTED_DIR:-}" ]]; then
+    echo "rccopy: no directory selected" >&2
+    exit 0
+  fi
+
+  if [[ "$SELECTED_DIR" == "." ]]; then
+    DEST_DIR="${REMOTE%/}"
+  else
+    DEST_DIR="${REMOTE}${SELECTED_DIR%/}"
+  fi
+fi
+
+COPIED_COUNT=0
+FAILED_COUNT=0
+
+for f in "${FILES[@]}"; do
+  base=$(basename -- "$f")
+  target=$(dest_path "$DEST_DIR" "$base")
+  if rclone copyto "$f" "$target"; then
+    COPIED_COUNT=$(( COPIED_COUNT + 1 ))
+    echo "Copied: $f -> $target"
+  else
+    FAILED_COUNT=$(( FAILED_COUNT + 1 ))
+    echo "Failed to copy: $f" >&2
+  fi
+done
+
+echo
+echo "Copied $COPIED_COUNT file(s) to $DEST_DIR."
+if [[ "$FAILED_COUNT" -gt 0 ]]; then
+  echo "$FAILED_COUNT file(s) failed to copy." >&2
+fi

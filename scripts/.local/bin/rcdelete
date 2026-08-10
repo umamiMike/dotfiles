@@ -1,0 +1,90 @@
+#!/usr/bin/env bash
+# Delete remote files piped in on stdin (one full remote:path per line, e.g.
+# from rcfind). Prompts for confirmation with the total count/size unless
+# -f/--force is given. No per-file review - use rcreview for that.
+#
+# Usage: rcfind <remote:path> | rcdelete [-f|--force]
+
+set -uo pipefail
+
+FORCE=0
+for arg in "$@"; do
+  case "$arg" in
+    -f|--force) FORCE=1 ;;
+    *)
+      echo "Usage: rcdelete [-f|--force]" >&2
+      exit 1
+      ;;
+  esac
+done
+
+command -v rclone >/dev/null || { echo "rcdelete: 'rclone' not found" >&2; exit 1; }
+command -v python3 >/dev/null || { echo "rcdelete: 'python3' not found" >&2; exit 1; }
+
+mapfile -t INPUT_PATHS
+
+FILES=()
+for p in "${INPUT_PATHS[@]}"; do
+  [[ -n "$p" ]] || continue
+  FILES+=("$p")
+done
+
+if [[ ${#FILES[@]} -eq 0 ]]; then
+  echo "rcdelete: no input" >&2
+  exit 0
+fi
+
+human_size() {
+  awk -v b="$1" 'BEGIN {
+    units["0"]="B"; units["1"]="KB"; units["2"]="MB"; units["3"]="GB"; units["4"]="TB"
+    u=0
+    while (b >= 1024 && u < 4) { b /= 1024; u++ }
+    printf "%.1f %s", b, units[u]
+  }'
+}
+
+file_size() {
+  rclone size "$1" --json 2>/dev/null | python3 -c 'import json,sys
+try:
+    print(json.load(sys.stdin).get("bytes", 0))
+except Exception:
+    print(0)'
+}
+
+declare -A SIZE_OF
+TOTAL_BYTES=0
+for f in "${FILES[@]}"; do
+  size=$(file_size "$f")
+  SIZE_OF["$f"]="$size"
+  TOTAL_BYTES=$(( TOTAL_BYTES + size ))
+done
+
+if [[ "$FORCE" -ne 1 ]]; then
+  read -r -p "About to delete ${#FILES[@]} file(s), totaling $(human_size "$TOTAL_BYTES") - proceed? [y/N]: " confirm < /dev/tty
+  case "$confirm" in
+    y|Y) ;;
+    *) echo "Aborted." >&2; exit 0 ;;
+  esac
+fi
+
+DELETED_BYTES=0
+DELETED_COUNT=0
+FAILED_COUNT=0
+
+for f in "${FILES[@]}"; do
+  size="${SIZE_OF[$f]:-0}"
+  if rclone deletefile "$f"; then
+    DELETED_BYTES=$(( DELETED_BYTES + size ))
+    DELETED_COUNT=$(( DELETED_COUNT + 1 ))
+    echo "Deleted: $f ($(human_size "$size"))"
+  else
+    FAILED_COUNT=$(( FAILED_COUNT + 1 ))
+    echo "Failed to delete: $f" >&2
+  fi
+done
+
+echo
+echo "Deleted $DELETED_COUNT file(s), freed $(human_size "$DELETED_BYTES")."
+if [[ "$FAILED_COUNT" -gt 0 ]]; then
+  echo "$FAILED_COUNT file(s) failed to delete." >&2
+fi
