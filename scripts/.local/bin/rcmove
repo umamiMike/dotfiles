@@ -41,6 +41,24 @@ done
 
 command -v rclone >/dev/null || { echo "rcmove: 'rclone' not found" >&2; exit 1; }
 
+list_or_die() {
+  local __outvar="$1"; shift
+  local -n __out_ref="$__outvar"
+  local out_file err_file rc
+  out_file=$(mktemp)
+  err_file=$(mktemp)
+  rclone "$@" >"$out_file" 2>"$err_file"
+  rc=$?
+  if [[ $rc -ne 0 ]]; then
+    echo "rcmove: rclone $1 failed (exit $rc):" >&2
+    cat "$err_file" >&2
+    rm -f "$out_file" "$err_file"
+    exit 1
+  fi
+  mapfile -t __out_ref < "$out_file"
+  rm -f "$out_file" "$err_file"
+}
+
 mapfile -t INPUT_PATHS
 
 FILES=()
@@ -92,7 +110,7 @@ elif [[ "$MODE" == "local" ]]; then
 elif [[ "$MODE" == "remote" ]]; then
   command -v fzf >/dev/null || { echo "rcmove: 'fzf' not found" >&2; exit 1; }
 
-  mapfile -t REMOTES < <(rclone listremotes 2>/dev/null)
+  list_or_die REMOTES listremotes
 
   if [[ ${#REMOTES[@]} -eq 0 ]]; then
     echo "rcmove: no rclone remotes configured" >&2
@@ -106,7 +124,7 @@ elif [[ "$MODE" == "remote" ]]; then
     exit 0
   fi
 
-  mapfile -t DIRS < <(rclone lsf "$SELECTED_REMOTE" --dirs-only -R 2>/dev/null)
+  list_or_die DIRS lsf "$SELECTED_REMOTE" --dirs-only -R
 
   DIR_OPTIONS=(".")
   DIR_OPTIONS+=("${DIRS[@]}")
@@ -128,7 +146,7 @@ else
 
   REMOTE="${FILES[0]%%:*}:"
 
-  mapfile -t DIRS < <(rclone lsf "$REMOTE" --dirs-only -R 2>/dev/null)
+  list_or_die DIRS lsf "$REMOTE" --dirs-only -R
 
   DIR_OPTIONS=(".")
   DIR_OPTIONS+=("${DIRS[@]}")

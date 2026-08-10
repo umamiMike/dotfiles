@@ -27,6 +27,24 @@ for bin in rclone fzf; do
   command -v "$bin" >/dev/null || { echo "rcfind: '$bin' not found" >&2; exit 1; }
 done
 
+list_or_die() {
+  local __outvar="$1"; shift
+  local -n __out_ref="$__outvar"
+  local out_file err_file rc
+  out_file=$(mktemp)
+  err_file=$(mktemp)
+  rclone "$@" >"$out_file" 2>"$err_file"
+  rc=$?
+  if [[ $rc -ne 0 ]]; then
+    echo "rcfind: rclone $1 failed (exit $rc):" >&2
+    cat "$err_file" >&2
+    rm -f "$out_file" "$err_file"
+    exit 1
+  fi
+  mapfile -t __out_ref < "$out_file"
+  rm -f "$out_file" "$err_file"
+}
+
 full_remote_path() {
   local rel="$1"
   if [[ "$BASE" == *: ]]; then
@@ -41,7 +59,7 @@ if [[ -n "$FILTER" ]]; then
   INCLUDE_ARGS=(--include "*${FILTER}*")
 fi
 
-mapfile -t ALL_PATHS < <(rclone lsf "$BASE" --files-only -R "${INCLUDE_ARGS[@]}" 2>/dev/null)
+list_or_die ALL_PATHS lsf "$BASE" --files-only -R "${INCLUDE_ARGS[@]}"
 
 if [[ ${#ALL_PATHS[@]} -eq 0 ]]; then
   echo "rcfind: no files found under $BASE" >&2

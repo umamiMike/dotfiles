@@ -22,6 +22,24 @@ done
 
 command -v rcreview >/dev/null || { echo "rcplay: 'rcreview' not found (expected alongside rcplay on PATH)" >&2; exit 1; }
 
+list_or_die() {
+  local __outvar="$1"; shift
+  local -n __out_ref="$__outvar"
+  local out_file err_file rc
+  out_file=$(mktemp)
+  err_file=$(mktemp)
+  rclone "$@" >"$out_file" 2>"$err_file"
+  rc=$?
+  if [[ $rc -ne 0 ]]; then
+    echo "rcplay: rclone $1 failed (exit $rc):" >&2
+    cat "$err_file" >&2
+    rm -f "$out_file" "$err_file"
+    exit 1
+  fi
+  mapfile -t __out_ref < "$out_file"
+  rm -f "$out_file" "$err_file"
+}
+
 BASE="${1%/}"
 
 full_remote_path() {
@@ -47,7 +65,7 @@ for ext in "${SELECTED_EXT[@]}"; do
   INCLUDE_ARGS+=(--include "*.${ext}")
 done
 
-mapfile -t ALL_PATHS < <(rclone lsf "$BASE" --files-only -R "${INCLUDE_ARGS[@]}" 2>/dev/null)
+list_or_die ALL_PATHS lsf "$BASE" --files-only -R "${INCLUDE_ARGS[@]}"
 
 mapfile -t FILES < <(printf '%s\n' "${ALL_PATHS[@]}" | fzf -m --bind "$FZF_BIND" --prompt="media> ")
 

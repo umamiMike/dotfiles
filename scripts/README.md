@@ -161,6 +161,14 @@ All three tools share the same fzf multiselect bindings:
   fzf's default of moving down)
 - `ctrl-a` — select all
 
+## Error surfacing
+
+`rcfind`, `rctypes`, `rcplay`, `rcmove`, and `rccopy` all list via a shared
+`list_or_die` helper: if the underlying `rclone` call fails (wrong remote
+name, missing auth, GCS remotes needing `project_number` for bucket
+listing, etc.), the actual rclone error is printed and the script exits —
+it no longer looks identical to "this directory is just empty."
+
 ## Gotchas
 
 - Stow links files individually, not the whole `.local/bin/` directory —
