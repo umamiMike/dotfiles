@@ -37,6 +37,7 @@ tmux source-file ~/.dotfiles/tmux/.config/tmux/tmux.conf
 | `tmuxinator/` | `~/.config/tmuxinator/` and `~/tmuxinator_completion.zsh` |
 | `elixir/` | `~/.iex.exs` |
 | `tealdeer/` | `~/Library/Application Support/tealdeer/` |
+| `scripts/` | `~/.local/bin/` |
 
 ## Neovim config
 

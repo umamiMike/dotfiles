@@ -1,0 +1,129 @@
+#!/usr/bin/env bash
+# Browse media files (video/audio/image) on an rclone remote, multiselect with
+# fzf, stream each via mpv (no local save), then rename/delete/skip on the remote.
+# Images are displayed until closed, same as video/audio playback.
+#
+# Usage: rcplay <remote:path>
+
+set -uo pipefail
+
+usage() {
+  echo "Usage: rcplay <remote:path>" >&2
+  exit 1
+}
+
+[[ $# -eq 1 ]] || usage
+
+for bin in rclone mpv fzf curl python3; do
+  command -v "$bin" >/dev/null || { echo "rcplay: '$bin' not found" >&2; exit 1; }
+done
+
+BASE="${1%/}"
+
+full_remote_path() {
+  local rel="$1"
+  if [[ "$BASE" == *: ]]; then
+    echo "${BASE}${rel}"
+  else
+    echo "${BASE}/${rel}"
+  fi
+}
+
+urlencode() {
+  python3 -c 'import urllib.parse,sys; print(urllib.parse.quote(sys.argv[1], safe="/"))' "$1"
+}
+
+human_size() {
+  awk -v b="$1" 'BEGIN {
+    units["0"]="B"; units["1"]="KB"; units["2"]="MB"; units["3"]="GB"; units["4"]="TB"
+    u=0
+    while (b >= 1024 && u < 4) { b /= 1024; u++ }
+    printf "%.1f %s", b, units[u]
+  }'
+}
+
+EXTENSIONS=(mp4 mkv mov avi webm m4v mp3 flac wav ogg m4a jpg jpeg png gif webp bmp tiff heic)
+
+mapfile -t SELECTED_EXT < <(printf '%s\n' "${EXTENSIONS[@]}" | fzf -m --prompt="types> ")
+
+if [[ ${#SELECTED_EXT[@]} -eq 0 ]]; then
+  echo "No types selected." >&2
+  exit 0
+fi
+
+INCLUDE_ARGS=()
+for ext in "${SELECTED_EXT[@]}"; do
+  INCLUDE_ARGS+=(--include "*.${ext}")
+done
+
+declare -A SIZE_OF
+ALL_PATHS=()
+while IFS=$'\t' read -r size path; do
+  [[ -n "$path" ]] || continue
+  SIZE_OF["$path"]="$size"
+  ALL_PATHS+=("$path")
+done < <(rclone lsf "$BASE" --files-only -R "${INCLUDE_ARGS[@]}" --format "sp" --separator $'\t' 2>/dev/null)
+
+mapfile -t FILES < <(printf '%s\n' "${ALL_PATHS[@]}" | fzf -m --prompt="media> ")
+
+if [[ ${#FILES[@]} -eq 0 ]]; then
+  echo "No files selected." >&2
+  exit 0
+fi
+
+DELETED_BYTES=0
+DELETED_COUNT=0
+
+PORT=$(( (RANDOM % 20000) + 20000 ))
+rclone serve http "$BASE" --addr "127.0.0.1:$PORT" >/dev/null 2>&1 &
+SERVE_PID=$!
+
+cleanup() {
+  kill "$SERVE_PID" 2>/dev/null
+  wait "$SERVE_PID" 2>/dev/null
+}
+trap cleanup EXIT INT TERM
+
+for _ in $(seq 1 20); do
+  curl -s -o /dev/null "http://127.0.0.1:$PORT/" && break
+  sleep 0.25
+done
+
+for f in "${FILES[@]}"; do
+  echo "Playing: $f"
+  mpv --image-display-duration=inf "http://127.0.0.1:$PORT/$(urlencode "$f")"
+
+  read -r -p "[r]ename / [d]elete / [Enter]=continue: " action
+  case "$action" in
+    r|R)
+      base=$(basename -- "$f")
+      ext="${base##*.}"
+      read -r -p "New name (no extension): " newname
+      newname="${newname// /-}.${ext}"
+      dir=$(dirname -- "$f")
+      if [[ "$dir" == "." ]]; then
+        newrel="$newname"
+      else
+        newrel="$dir/$newname"
+      fi
+      rclone moveto "$(full_remote_path "$f")" "$(full_remote_path "$newrel")"
+      ;;
+    d|D)
+      if rclone deletefile "$(full_remote_path "$f")"; then
+        size="${SIZE_OF[$f]:-0}"
+        DELETED_BYTES=$(( DELETED_BYTES + size ))
+        DELETED_COUNT=$(( DELETED_COUNT + 1 ))
+        echo "Deleted: $f ($(human_size "$size"))"
+      else
+        echo "Failed to delete: $f" >&2
+      fi
+      ;;
+    *)
+      ;;
+  esac
+done
+
+if [[ $DELETED_COUNT -gt 0 ]]; then
+  echo
+  echo "Deleted $DELETED_COUNT file(s), freed $(human_size "$DELETED_BYTES")."
+fi
