@@ -128,6 +128,10 @@ export PATH=$PATH:~/go/bin
 export PATH=$PATH:~/.config/wilding/shell
 [ -f ~/.config/wilding/shell/wildvid.sh ] && source ~/.config/wilding/shell/wildvid.sh
 
+# Where the /session-summary Claude command writes session recaps, regardless
+# of which project a session runs in.
+export CLAUDE_SESSION_SUMMARIES_DIR="$HOME/personal-journal/personal-journal/claude-sessions"
+
 # export PATH="/opt/homebrew/opt/pyside@2/bin:$PATH"
 #alias python="python3"
 
