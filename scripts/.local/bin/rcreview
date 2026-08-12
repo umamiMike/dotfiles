@@ -58,6 +58,34 @@ except Exception:
     print(0)'
 }
 
+RECENT_DIRS_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/rcreview/recent_dirs"
+
+remember_dir() {
+  local dir="$1"
+  mkdir -p "$(dirname "$RECENT_DIRS_FILE")"
+  touch "$RECENT_DIRS_FILE"
+  { printf '%s\n' "$dir"; grep -vF -x "$dir" "$RECENT_DIRS_FILE"; } | head -n 20 > "${RECENT_DIRS_FILE}.tmp"
+  mv "${RECENT_DIRS_FILE}.tmp" "$RECENT_DIRS_FILE"
+}
+
+list_or_die() {
+  local __outvar="$1"; shift
+  local -n __out_ref="$__outvar"
+  local out_file err_file rc
+  out_file=$(mktemp)
+  err_file=$(mktemp)
+  rclone "$@" >"$out_file" 2>"$err_file"
+  rc=$?
+  if [[ $rc -ne 0 ]]; then
+    echo "rcreview: rclone $1 failed (exit $rc):" >&2
+    cat "$err_file" >&2
+    rm -f "$out_file" "$err_file"
+    exit 1
+  fi
+  mapfile -t __out_ref < "$out_file"
+  rm -f "$out_file" "$err_file"
+}
+
 open_with_os_default() {
   local f="$1"
   if command -v open >/dev/null; then
@@ -105,6 +133,7 @@ for f in "${FILES[@]}"; do
   full="${REMOTE}${f}"
   ext_lower=$(printf '%s' "${f##*.}" | tr '[:upper:]' '[:lower:]')
 
+  while true; do
   if [[ "$ext_lower" == "stl" ]]; then
     size=$(file_size "$full")
     proceed=1
@@ -147,9 +176,61 @@ for f in "${FILES[@]}"; do
     rm -f "$tmpfile"
   fi
 
-  read -r -p "[r]ename / [d]elete / [q]uit / [Enter]=continue: " action < /dev/tty
+  read -r -p "[r]ename / [m]ove / [d]elete / [p]lay again / [q]uit / [Enter]=continue: " action < /dev/tty
   case "$action" in
     q|Q)
+      break 2
+      ;;
+    p|P)
+      continue
+      ;;
+    m|M)
+      mkdir -p "$(dirname "$RECENT_DIRS_FILE")"
+      touch "$RECENT_DIRS_FILE"
+      mapfile -t RECENT_DIRS < "$RECENT_DIRS_FILE"
+
+      BROWSE_LABEL="Browse for a different directory..."
+      MENU=("$BROWSE_LABEL")
+      MENU+=("${RECENT_DIRS[@]}")
+
+      CHOICE=$(printf '%s\n' "${MENU[@]}" | fzf --prompt="move to> ")
+
+      DEST_DIR=""
+      if [[ -z "${CHOICE:-}" ]]; then
+        echo "rcreview: no destination selected" >&2
+      elif [[ "$CHOICE" == "$BROWSE_LABEL" ]]; then
+        list_or_die DIRS lsf "$REMOTE" --dirs-only -R
+
+        DIR_OPTIONS=(".")
+        DIR_OPTIONS+=("${DIRS[@]}")
+
+        SELECTED_DIR=$(printf '%s\n' "${DIR_OPTIONS[@]}" | fzf --prompt="destination> ")
+
+        if [[ -z "${SELECTED_DIR:-}" ]]; then
+          echo "rcreview: no directory selected" >&2
+        elif [[ "$SELECTED_DIR" == "." ]]; then
+          DEST_DIR="${REMOTE%/}"
+        else
+          DEST_DIR="${REMOTE}${SELECTED_DIR%/}"
+        fi
+      else
+        DEST_DIR="$CHOICE"
+      fi
+
+      if [[ -n "$DEST_DIR" ]]; then
+        base=$(basename -- "$f")
+        if [[ "$DEST_DIR" == *: ]]; then
+          target="${DEST_DIR}${base}"
+        else
+          target="${DEST_DIR}/${base}"
+        fi
+        if rclone moveto "${REMOTE}${f}" "$target"; then
+          echo "Moved: $f -> $target"
+          remember_dir "$DEST_DIR"
+        else
+          echo "Failed to move: $f" >&2
+        fi
+      fi
       break
       ;;
     r|R)
@@ -164,6 +245,7 @@ for f in "${FILES[@]}"; do
         newrel="$dir/$newname"
       fi
       rclone moveto "${REMOTE}${f}" "${REMOTE}${newrel}"
+      break
       ;;
     d|D)
       full="${REMOTE}${f}"
@@ -175,10 +257,13 @@ for f in "${FILES[@]}"; do
       else
         echo "Failed to delete: $f" >&2
       fi
+      break
       ;;
     *)
+      break
       ;;
   esac
+  done
 done
 
 if [[ $DELETED_COUNT -gt 0 ]]; then

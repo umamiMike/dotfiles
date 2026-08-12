@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+# Repeatedly narrow a list of remote:path lines piped in on stdin via fzf,
+# confirming after each pass whether to filter again. Prints the final
+# subset to stdout, one per line - composes with rcfind/rcreview/etc.
+#
+# Usage: rcfind <remote:path> | rcnarrow | rcreview
+
+set -uo pipefail
+
+FZF_BIND="tab:toggle+up,ctrl-a:select-all"
+
+command -v fzf >/dev/null || { echo "rcnarrow: 'fzf' not found" >&2; exit 1; }
+
+mapfile -t CURRENT
+
+if [[ ${#CURRENT[@]} -eq 0 ]]; then
+  echo "rcnarrow: no input" >&2
+  exit 0
+fi
+
+while true; do
+  mapfile -t CURRENT < <(printf '%s\n' "${CURRENT[@]}" | fzf -m --bind "$FZF_BIND" --prompt="narrow> ")
+
+  if [[ ${#CURRENT[@]} -eq 0 ]]; then
+    echo "rcnarrow: no items selected" >&2
+    exit 0
+  fi
+
+  read -r -p "Filter again? [y/N]: " again < /dev/tty
+  case "$again" in
+    y|Y) continue ;;
+    *) break ;;
+  esac
+done
+
+printf '%s\n' "${CURRENT[@]}"

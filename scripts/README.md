@@ -11,7 +11,8 @@ scripts/.local/bin/
 ├── rcreview  # play/rename/delete/skip files piped in on stdin
 ├── rcdelete  # bulk-delete files piped in on stdin, no per-file review
 ├── rcmove    # move files piped in on stdin to a chosen/given directory
-└── rccopy    # copy files piped in on stdin to a chosen/given directory
+├── rccopy    # copy files piped in on stdin to a chosen/given directory
+└── rcnarrow  # repeatedly re-filter files piped in on stdin via fzf
 ```
 
 Both require `rclone`, `fzf`, `mpv`/`curl`/`python3` on PATH, and an rclone
@@ -61,7 +62,16 @@ composes with `rcfind`, `rcplay`, or any other producer of remote paths.
 4. After each file, prompts:
    - `r` — rename (enter the new name without an extension; spaces become
      `-`; the original extension is kept)
+   - `m` — move to another directory. Offers a single-select fzf list of
+     your most recently used destinations (from
+     `~/.config/rcreview/recent_dirs`, persisted across runs) plus a
+     "Browse for a different directory..." entry, which opens the same
+     directory picker `rcmove`'s default mode uses, scoped to the
+     current file's remote. Whichever destination you land on gets
+     pushed to the top of that recent list (deduped, capped to 20).
    - `d` — delete on the remote, with immediate size feedback
+   - `p` — play/view the current file again (re-runs the same view step —
+     mpv, MeshLab, or the OS default opener — instead of moving on)
    - `q` — quit the whole review, skipping any remaining files
    - Enter — continue to the next file
 5. On exit (including via `q`), prints a summary: files deleted and total
@@ -152,6 +162,26 @@ feedback and a final success/fail summary:
 rcfind gdrive_hey:Videos | rcmove --to gdrive-mwc:Archive
 rcfind stl gdrive_hey:Models | rccopy
 ```
+
+## rcnarrow
+
+```
+rcfind <remote:path> | rcnarrow | rcreview
+```
+
+For progressively narrowing a selection across multiple distinct fzf
+passes rather than one query in one session (see also: fzf's own extended
+search, where space-separated terms already AND together within a single
+pass — `rcnarrow` is for when you want separate confirm-and-refilter
+steps instead). Reads full lines from stdin, same composable pattern as
+`rcreview`/`rcdelete`/`rcmove`/`rccopy`:
+
+1. Runs fzf over the current list.
+2. Prompts `Filter again? [y/N]:` — `y` loops back and re-runs fzf on the
+   now-narrowed subset; anything else stops.
+3. If a pass leaves nothing selected, it stops immediately rather than
+   looping on an empty list.
+4. Prints the final subset to stdout, one per line.
 
 ## fzf conventions
 
