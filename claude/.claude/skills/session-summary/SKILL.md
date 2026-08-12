@@ -23,11 +23,18 @@ transcript. Each bullet is one line: what changed or was decided, not how.
 
   - <bullet>
   - <bullet>
+
+  ## Open questions / follow-up
+  - <bullet>
   ```
-- Keep it to outcomes, not the back-and-forth — one bullet per distinct piece of work
-  completed, decision made, or bug fixed. Skip exploratory dead ends and clarifying questions
-  unless they changed the outcome.
+- Keep the main section to outcomes, not the back-and-forth — one bullet per distinct piece of
+  work completed, decision made, or bug fixed. Skip exploratory dead ends and clarifying
+  questions unless they changed the outcome.
 - Aim for under 10 bullets for a normal session; use nested sub-bullets only if a single item
   genuinely needs it.
+- `## Open questions / follow-up` always appears, even when empty — write a single `- None.`
+  rather than omitting the section, so scanning later doesn't require guessing whether it was
+  skipped. Include unresolved questions the user hasn't answered yet, decisions explicitly
+  deferred, and anything flagged as "later"/"backlog"/"next time" during the session.
 - After writing, report the file path back to the user — don't also print the full summary in
   chat, the file is the record.
