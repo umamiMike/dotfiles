@@ -14,9 +14,9 @@ transcript. Each bullet is one line: what changed or was decided, not how.
   rather than guessing a fallback location.
 - Determine the project name: if the cwd is inside a git repo, use the basename of `git
   rev-parse --show-toplevel`; otherwise use the basename of the cwd.
-- Write to `$CLAUDE_SESSION_SUMMARIES_DIR/<YYYY-MM-DD-HHMMSS>-<project-name>.md` (timestamp of
-  when the summary is written, so multiple sessions - in this or other projects - don't
-  collide).
+- Write to `$CLAUDE_SESSION_SUMMARIES_DIR/<project-name>-<YYYY-MM-DD>-<HH-MM-SS>.md` (project
+  name first so files sort/group by project; timestamp of when the summary is written, so
+  multiple sessions - in this or other projects - don't collide).
 - File contents:
   ```
   # Session: <project-name> — <YYYY-MM-DD HH:MM>
