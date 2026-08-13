@@ -21,17 +21,26 @@ transcript. Each bullet is one line: what changed or was decided, not how.
   ```
   # Session: <project-name> — <YYYY-MM-DD HH:MM>
 
+  ## <Component/area 1>
   - <bullet>
+  - <bullet>
+
+  ## <Component/area 2>
   - <bullet>
 
   ## Open questions / follow-up
   - <bullet>
   ```
-- Keep the main section to outcomes, not the back-and-forth — one bullet per distinct piece of
-  work completed, decision made, or bug fixed. Skip exploratory dead ends and clarifying
-  questions unless they changed the outcome.
-- Aim for under 10 bullets for a normal session; use nested sub-bullets only if a single item
-  genuinely needs it.
+- Group bullets under `##` headers named for the file, tool, script, or feature area they
+  affect (e.g. `rcreview`, `gdrive-media-links.sh`, `zsh config`) - not fixed categories like
+  "Features"/"Fixes". Decide the headers fresh each session based on what was actually
+  touched; order them however reads best (chronological or by weight, whichever is clearer).
+  A session with one clear focus still gets one header, not a headerless list.
+- Keep bullets to outcomes, not the back-and-forth — one bullet per distinct piece of work
+  completed, decision made, or bug fixed. Skip exploratory dead ends and clarifying questions
+  unless they changed the outcome.
+- Aim for under 10 bullets total for a normal session; use nested sub-bullets only if a single
+  item genuinely needs it.
 - `## Open questions / follow-up` always appears, even when empty — write a single `- None.`
   rather than omitting the section, so scanning later doesn't require guessing whether it was
   skipped. Include unresolved questions the user hasn't answered yet, decisions explicitly
