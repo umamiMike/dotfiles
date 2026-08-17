@@ -105,6 +105,7 @@ require('lazy').setup({
         'query',
         'vim',
         'vimdoc',
+        'elixir',
       }
 
       vim.api.nvim_create_autocmd('FileType', {
@@ -208,10 +209,16 @@ require('lazy').setup({
       local builtin = require 'telescope.builtin'
       vim.keymap.set('n', '<leader>sh', builtin.help_tags, { desc = '[S]earch [H]elp' })
       vim.keymap.set('n', '<leader>sk', builtin.keymaps, { desc = '[S]earch [K]eymaps' })
-      vim.keymap.set('n', '<leader>sf', builtin.find_files, { desc = '[S]earch [F]iles' })
+      vim.keymap.set('n', '<leader>sf', function()
+        builtin.find_files(require('telescope.themes').get_ivy())
+      end, { desc = '[S]earch [F]iles' })
       vim.keymap.set('n', '<leader>ss', builtin.builtin, { desc = '[S]earch [S]elect Telescope' })
-      vim.keymap.set('n', '<leader>sw', builtin.grep_string, { desc = '[S]earch current [W]ord' })
-      vim.keymap.set('n', '<leader>sg', builtin.live_grep, { desc = '[S]earch by [G]rep' })
+      vim.keymap.set('n', '<leader>sw', function()
+        builtin.grep_string(require('telescope.themes').get_ivy())
+      end, { desc = '[S]earch current [W]ord' })
+      vim.keymap.set('n', '<leader>sg', function()
+        builtin.live_grep(require('telescope.themes').get_ivy())
+      end, { desc = '[S]earch by [G]rep' })
       vim.keymap.set('n', '<leader>sd', builtin.diagnostics, { desc = '[S]earch [D]iagnostics' })
       vim.keymap.set('n', '<leader>sr', builtin.resume, { desc = '[S]earch [R]esume' })
       vim.keymap.set('n', '<leader>s.', builtin.oldfiles, { desc = '[S]earch Recent Files ("." for repeat)' })
@@ -486,7 +493,7 @@ require('lazy').setup({
         -- Conform can also run multiple formatters sequentially
         python = { 'ruff_fix', 'ruff_format' },
         cpp = { 'clang-format' },
-        --
+        markdown = { 'prettierd', 'prettier', stop_after_first = true },
         -- You can use 'stop_after_first' to run the first available formatter from the list
         -- javascript = { "prettierd", "prettier", stop_after_first = true },
       },
@@ -582,7 +589,7 @@ require('lazy').setup({
   { import = 'custom.plugins' },
 }, {
   git = {
-    cmd = vim.fn.getenv('WSL_DISTRO_NAME') ~= vim.NIL and '/usr/bin/git' or 'git',
+    cmd = vim.fn.getenv 'WSL_DISTRO_NAME' ~= vim.NIL and '/usr/bin/git' or 'git',
   },
   ui = {
     -- If you are using a Nerd Font: set icons to an empty table which will use the
@@ -669,4 +676,3 @@ vim.keymap.set('v', '<leader>p', insert_print_from_visual, { silent = true, desc
 if vim.fn.has 'wsl' == 1 then
   vim.g.python3_host_prog = '/mnt/c/Users/mikew/AppData/Local/refuge/pipeline/bin/python/python.exe'
 end
-
