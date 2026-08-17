@@ -1,7 +1,7 @@
 # /Users/mikew/.config/tmuxinator/refuge-pipeline.yml
 
 name: refuge-pipeline
-root: ~/repos/refuge/apps/Pipeline
+root: ~/repos/refuge/Pipeline
 
 # Optional tmux socket
 # socket_name: foo

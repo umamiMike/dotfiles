@@ -1,7 +1,7 @@
 # /home/mike/.config/tmuxinator/qna.yml
 
 name: qna
-root: ~/repos/qna/
+root: ~/repos/wilding/qna
 
 # Optional tmux socket
 # socket_name: foo

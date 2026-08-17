@@ -1,7 +1,7 @@
 # /home/mike/.config/tmuxinator/lucy.yml
 
 name: lucy
-root: ~/repos/refuge/apps/Lucifer
+root: ~/repos/refuge/Lucifer
 
 # Optional tmux socket
 # socket_name: foo

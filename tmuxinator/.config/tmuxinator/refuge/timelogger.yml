@@ -1,7 +1,7 @@
 # /Users/mikew/.config/tmuxinator/timelogger.yml
 
 name: timelogger
-root: ~/repos/refuge/apps/timelogger
+root: ~/repos/refuge/timelogger
 
 # Optional tmux socket
 # socket_name: foo
@@ -17,8 +17,7 @@ root: ~/repos/refuge/apps/timelogger
 # Run on project start, the first time
 # on_project_first_start: command
 
-# Run on project start, after the first time
-# on_project_restart: command
+# Run on project start, after the first time on_project_restart: command
 # Run on project exit ( detaching from tmux session )
 # on_project_exit: command
 
@@ -50,5 +49,5 @@ windows:
       # 'before' represents legacy functionality and will be deprecated in a future release, in favour of 'after'
       # synchronize: after
       panes:
-        - nvim
+        - nvim ./
         - claude --model haiku
