@@ -122,7 +122,6 @@ source ~/tmuxinator_completion.zsh
 compdef _tmuxinator tmuxinator
 source ~/.aliases
 # source ~/.config/wilding/completions/fzf-completion.zsh
-alias act=". ~/repos/python-sandbox/env/bin/activate"
 export PATH=$PATH:~/repos/byoi/bin
 export PATH=$PATH:~/go/bin
 export PATH=$PATH:~/.config/wilding/shell
@@ -152,11 +151,6 @@ alias x86="arch -x86_64 zsh --login"
 alias arm="arch -arm64 zsh --login"
 source <(fzf --zsh)
 
-export PYENV_ROOT="$HOME/.pyenv"
-if command -v pyenv &>/dev/null || [[ -d $PYENV_ROOT/bin ]]; then
-  [[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"
-  eval "$(pyenv init -)"
-fi
 eval "$(tmuxinator completion zsh)"
 
 # function cd() {
@@ -171,3 +165,8 @@ eval "$(tmuxinator completion zsh)"
 
 [ -f "$HOME/.local/bin/env" ] && . "$HOME/.local/bin/env"
 export PATH="$HOME/.local/bin:$PATH"
+# The following lines have been added by Docker Desktop to enable Docker CLI completions.
+fpath=(/Users/mikew/.docker/completions $fpath)
+autoload -Uz compinit
+compinit
+# End of Docker CLI completions
