@@ -3,13 +3,16 @@ command -v lsd &>/dev/null && alias ls='lsd'
 # alias ls='ls -lAGh'
 alias al="alias | fzf"
 alias calc='bc -l'
-alias clc="fc -ln -1 | awk '{\$1=\$1}1' | xclip -selection clipboard"
+
+alias clc="fc -ln -1 | awk '{\$1=\$1}1' | xclip -selection clipboard" #TODO: what is this?
 
 # docker ========================================================================================
 if command docker &> /dev/null
 then
   alias d="docker"
   alias dc="docker compose "
+  alias dcd="docker compose down"
+  alias dcdu="docker compose down && docker compose up -d && docker compose logs -f"
   alias dka='docker kill $(docker ps -a -q)'
   alias dps="docker ps"
 fi
@@ -100,8 +103,6 @@ elif [ -n "$BASH_VERSION" ]; then
   fi
 fi
 
-alias hh='cat ~/.bash_history | sort | uniq | fzf'
-alias gsls="gsutil ls | fzf | xargs gsutil ls "
 
 #
 alias nvf='nvim $(fzf)'
@@ -113,9 +114,10 @@ alias rgf="rg --files | rg "
 alias se="source $bf/aliases.sh"
 
 alias np="nix profile"
+alias ndz="nix develop -c zsh"
 
-alias snvim="sudo /home/mike/.nix-profile/bin/nvim"
-alias updateshell="nvim ~/.config/wilding/aliases.sh && source ~/.zshrc"
+alias w-sudonvim="sudo /home/mike/.nix-profile/bin/nvim"
+alias w-updateshell="nvim ~/.config/wilding/aliases.sh && source ~/.zshrc"
 
 mkdo () {
   mkdir $1
@@ -176,9 +178,10 @@ compdef mux=tmuxinator
 alias tmuxe="nvim $bf/tmux.conf"
 alias tmuxs="tmux source-file $bf/tmux.conf"
 
+tmux-kill-by-name() {tmux ls -F "#S" | fzf -m | xargs -n 1 tmux kill-session -t}
 
 # elixir  ===============================================================
-#
+
 # alias mixtest="fswatch -o -r --event=Created --event=Updated lib test | mix test  --listen-on-stdin"
 function mixtest() {
   [ "$1" != "" ] && cmd="$1"  || cmd="mix test --listen-on-stdin"
@@ -288,9 +291,6 @@ watchnrun () {
  f="$1"; c="$2" &&  find $f  | entr $c $f
 }
 
-view-aliases () {
-  cat $bf/aliases.sh | fzf
-}
 
 wild-editAliases () {
   nvim "$bf/aliases.sh"
@@ -309,16 +309,11 @@ search-on-reddit () {
 }
 
 ask_ollama () {
-  message="$@"
-  echo "${message}"
-  name="$(echo ${message:0:24} | sed s/\ /_/g).md"
-  ollama run hf.co/mradermacher/git-commit-1.5B-GGUF:Q5_K_M  "${message}"  | tee -a "${name}" | glow 
+	message="${*}"
+  ollama run hf.co/MaziyarPanahi/Qwen3-0.6B-GGUF:Q6_K  "${message}"
 }
 
-show () {
-	cat "${1}" | glow
-}
-# corpus ======================================================================================
+# corpus  wilding journal ======================================================================================
 
 tldw () {
 cd ~/personal-journal/personal-journal/tech && nvim -c "lua require('telescope.builtin').live_grep({search = '$*'})"
@@ -328,13 +323,17 @@ tldf () {
 cd ~/personal-journal/personal-journal/tech && nvim -c "lua require('telescope.builtin').find_files({search_file = '$*'})"
 }
 
-makepdf() { md2pdf $1; open "$(echo $1 | sed 's/\.md/\.pdf/g')"}
+# Cloud service related ========================================
 
-tmux-kill-by-name() {tmux ls -F "#S" | fzf -m | xargs -n 1 tmux kill-session -t}
+	#  list things with gsutils
+alias gsls="gsutil ls | fzf | xargs gsutil ls "
+# strip first word and space from out
+# EX: history | strip_first will remove the numbering
+# Terminal convenience ==========================================
+w-strip_first() { awk '{$1=""; sub(/^ /, ""); print}'; }
 
-refuge() {
-  local repo="${1:-$(basename $(git rev-parse --show-toplevel 2>/dev/null))}"
-  open "https://dev.rocketchat.app/refuge/${repo}"
+show () {
+	echo "showing the file using glow"
+	cat "${1}" | glow
 }
-
-
+alias cdj='cd ~/personal-journal/personal-journal'
