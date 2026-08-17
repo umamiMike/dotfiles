@@ -21,6 +21,7 @@
     google-cloud-sdk
     cabal-install
     (haskellPackages.ghcWithPackages (p: with p; [ text containers ]))
+	cht-sh
     # nmap
     tmux
     tmuxinator
