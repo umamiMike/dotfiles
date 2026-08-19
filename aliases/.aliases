@@ -19,7 +19,6 @@ alias wild-ffrom='ff="$(fzf | xargs cat )"; echo "$ff" | fzf'    # pick a file, 
 alias fswatch-ruby="fswatch -o -r --event=Created --event=Updated lib test"    # watch lib/test for ruby file changes
 
 alias ga='git add'                # git add
-
 alias gig='git add .gitignore && git commit -m "ignore"'    # add .gitignore and commit as "ignore"
 alias gb='git branch'             # git branch
 alias gc='git checkout'           # git checkout
@@ -232,6 +231,7 @@ function mixtesthead () {
 # various =============================================================
 #
 
+
 # open todo.md in cwd (or fd-found todo.md)
 td() {
 	todo_path=$(fd todo.md -1)
@@ -375,6 +375,15 @@ ngrep() {
   fi
 }
 
+# live-grep the personal journal tech notes in nvim
+tldw () {
+cd ~/personal-journal/personal-journal/tech && nvim -c "lua require('telescope.builtin').live_grep({search = '$*'})"
+}
+
+# find files in the personal journal tech notes in nvim
+tldf () {
+cd ~/personal-journal/personal-journal/tech && nvim -c "lua require('telescope.builtin').find_files({search_file = '$*'})"
+}
 
 # convert markdown to pdf and open it
 makepdf() { md2pdf $1; open "$(echo $1 | sed 's/\.md/\.pdf/g')"}
