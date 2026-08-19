@@ -1,50 +1,75 @@
 #!/bin/sh
 command -v lsd &>/dev/null && alias ls='lsd'
 # alias ls='ls -lAGh'
-alias al="alias | fzf"
-alias calc='bc -l'
-alias clc="fc -ln -1 | awk '{\$1=\$1}1' | xclip -selection clipboard"
+alias al="alias | fzf"    # fuzzy list of all aliases
+alias calc='bc -l'        # arbitrary-precision calculator
+alias clc="fc -ln -1 | awk '{\$1=\$1}1' | xclip -selection clipboard"    # copy last shell command to clipboard
 
 # docker ========================================================================================
 if command docker &> /dev/null
 then
-  alias d="docker"
-  alias dc="docker compose "
-  alias dka='docker kill $(docker ps -a -q)'
-  alias dps="docker ps"
+  alias d="docker"              # docker
+  alias dc="docker compose "    # docker compose
+  alias dka='docker kill $(docker ps -a -q)'    # kill all running docker containers
+  alias dps="docker ps"         # docker ps
 fi
-alias ducks='du -hcks * | sort -rn | head'
-alias wild-ffrom='ff="$(fzf | xargs cat )"; echo "$ff" | fzf'
+alias ducks='du -hcks * | sort -rn | head'    # disk usage of cwd entries, largest first
+alias wild-ffrom='ff="$(fzf | xargs cat )"; echo "$ff" | fzf'    # pick a file, cat it, fzf the output
 
-alias fswatch-ruby="fswatch -o -r --event=Created --event=Updated lib test"
+alias fswatch-ruby="fswatch -o -r --event=Created --event=Updated lib test"    # watch lib/test for ruby file changes
 
-alias ga='git add'
-alias gig='git add .gitignore && git commit -m "ignore"'
-alias gb='git branch'
-alias gc='git checkout'
-alias gcb='git checkout -b'
-alias gca='git commit --amend'
-alias gcme='git commit -m '
-alias gd='git diff'
-alias gdh='git diff HEAD~1' # diff the last commit
+alias ga='git add'                # git add
+alias gig='git add .gitignore && git commit -m "ignore"'    # add .gitignore and commit as "ignore"
+alias gb='git branch'             # git branch
+alias gc='git checkout'           # git checkout
+alias gcb='git checkout -b'       # git checkout new branch
+alias gca='git commit --amend'    # git commit --amend
+alias gcme='git commit -m '       # git commit -m
+alias gd='git diff'               # git diff
+alias gdh='git diff HEAD~1'       # diff the last commit
 
-alias gdno='git diff --name-only'
-alias gl='git log'
-alias glo='git log --oneline' 
+alias gdno='git diff --name-only'                     # git diff, name-only
+alias gsno='git diff --name-only --staged'            # staged files, name-only
+alias gano='git status --porcelain | cut -c4-'        # all changed: staged + unstaged + untracked
 
-alias gp='git push'
-alias gpo='git push origin'
-alias gpsu='git push --set-upstream origin $(git branch --show-current)'
+alias n-gsno='nvim $(gsno | fzf)'     # open staged files
+alias n-gano='nvim $(gano | fzf)'     # open any changed/untracked file
+# remind what aliases and functions do
+w-help() {
+  {
+    grep -E "^alias " ~/.aliases | sed -E "s/^alias ([^=]+)=.*#[[:space:]]*/\1  /; s/^alias ([^=]+)=.*/\1/"
+    awk '
+      /^#/ { sub(/^#[ \t]*/, ""); c=$0; next }
+      /^(function[ \t]+)?[A-Za-z_][A-Za-z0-9_-]*[ \t]*\(\)/ {
+        name=$0
+        sub(/^function[ \t]+/, "", name)
+        sub(/[ \t]*\(\).*/, "", name)
+        print name "  " c
+        c=""
+        next
+      }
+      { c="" }
+    ' ~/.aliases
+  } | fzf
+}
 
-alias gpu='git pull'
-alias gpuo='git pull origin'
+alias gl='git log'    # git log
+alias glo='git log --oneline'     # git log, one line per commit
 
-alias grst='git restore --staged'  # use when accidentally git added something
-alias grv='git remote -v'
+alias gp='git push'                                        # git push
+alias gpo='git push origin'                                # git push origin
+alias gpsu='git push --set-upstream origin $(git branch --show-current)'    # push and set upstream to current branch
+alias gpob='git push origin $(git branch --show-current)'  # git push the current branch
 
-alias gs='git status'
+alias gpu='git pull'    # git pull
+alias gpuo='git pull origin'    # git pull origin
 
-alias vba='. venv/bin/activate'
+alias grst='git restore --staged'    # use when accidentally git added something
+alias grv='git remote -v'    # git remote -v
+
+alias gs='git status'    # git status
+
+alias vba='. venv/bin/activate'    # activate python venv
 # Git alias tab completions (bash + zsh compatible)
 if [ -n "$ZSH_VERSION" ]; then
   # Wrapper approach: rewrite words array so zsh's native _git sees
@@ -100,32 +125,35 @@ elif [ -n "$BASH_VERSION" ]; then
   fi
 fi
 
-alias hh='cat ~/.bash_history | sort | uniq | fzf'
-alias gsls="gsutil ls | fzf | xargs gsutil ls "
+alias hh='cat ~/.bash_history | sort | uniq | fzf'    # search bash history with fzf
+alias gsls="gsutil ls | fzf | xargs gsutil ls "    # browse gsutil ls output, then list selection
 
 #
-alias nvf='nvim $(fzf)'
+alias nvf='nvim $(fzf)'    # open file picked via fzf in nvim
 #
 # usage > op | xargs cat >> somefile.txt  will echo every selected file to a single text file
-alias op="fzf --preview='less {}' --bind shift-up:preview-page-up,shift-down:preview-page-down"
+alias op="fzf --preview='less {}' --bind shift-up:preview-page-up,shift-down:preview-page-down"    # fzf with a preview pane
 
-alias rgf="rg --files | rg "
-alias se="source $bf/aliases.sh"
+alias rgf="rg --files | rg "    # list files then filter with ripgrep
+alias se="source $bf/aliases.sh"    # source aliases file
 
-alias np="nix profile"
+alias np="nix profile"    # nix profile
 
-alias snvim="sudo /home/mike/.nix-profile/bin/nvim"
-alias updateshell="nvim ~/.config/wilding/aliases.sh && source ~/.zshrc"
+alias snvim="sudo /home/mike/.nix-profile/bin/nvim"    # run nvim as sudo
+alias updateshell="nvim ~/.config/wilding/aliases.sh && source ~/.zshrc"    # edit aliases then reload zshrc
 
+# make a dir and cd into it
 mkdo () {
   mkdir $1
   cd $1
 }
 
+# look up a cheat.sh page for the given topic
 cheat () {
   echo "${*}"
   curl -s "https://cheat.sh/${*}?T" | cat
 }
+# create and open a new dated hugo post
 hn () {
 cd $mob/projects
 logts=$(date +"%Y%m%d")
@@ -134,6 +162,7 @@ nvim content/"${1}${logts}.md"
 cd -
 }
 
+# open project-hub in nvim, filtered by pattern
 projects () {
   cd $HOME/repos/project-hub/
   nvim -c ":FindFiles ${*}"
@@ -145,6 +174,7 @@ h () {
   $1 --help | bat
 }
 
+# print $PATH, one entry per line
 paths () {
   echo $PATH | sed -r 's/\:/\n/g'
 }
@@ -155,6 +185,7 @@ mktemp --suffix ".json"
 }
 
 
+# open personal-journal content dir in nvim
 resources () {
 cd $mob/projects/content/
 nvim .
@@ -162,6 +193,7 @@ cd -
 
 }
 
+# diff-so-fancy view of a past commit (default HEAD)
 gitdiff () {
   [ $# -eq 0 ] && diffy=0 || diffy="$*"
   echo "$diffy"
@@ -171,21 +203,22 @@ gitdiff () {
 
 # TMUX ==================================================================
 
-alias mux="tmuxinator"
+alias mux="tmuxinator"    # tmuxinator
 compdef mux=tmuxinator
-alias tmuxe="nvim $bf/tmux.conf"
-alias tmuxs="tmux source-file $bf/tmux.conf"
+alias tmuxe="nvim $bf/tmux.conf"    # edit tmux config
+alias tmuxs="tmux source-file $bf/tmux.conf"    # reload tmux config
 
 
 # elixir  ===============================================================
 #
 # alias mixtest="fswatch -o -r --event=Created --event=Updated lib test | mix test  --listen-on-stdin"
+# watch lib/test and rerun mix test on change
 function mixtest() {
   [ "$1" != "" ] && cmd="$1"  || cmd="mix test --listen-on-stdin"
   fswatch -o -r --event=Created --event=Updated lib test | eval $cmd
 }
 
-alias fselixir="fswatch -o -r --event=Created --event=Updated lib test"
+alias fselixir="fswatch -o -r --event=Created --event=Updated lib test"    # watch lib/test for file changes
 # elixir related
 
 # dealing with overloaded printout
@@ -201,11 +234,13 @@ function mixtesthead () {
 #
 
 
+# open todo.md in cwd (or fd-found todo.md)
 td() {
 	todo_path=$(fd todo.md -1)
 	[ -e  "${todo_path}" ] && nvim "${todo_path}" || nvim ./todo.md
 }
 
+# run wild-progbar.sh with args
 wild-tmr() {
 wild-progbar.sh $1 "$2"
 }
@@ -215,6 +250,7 @@ findem() {
 ls *.* | entr -s "clear; rg $1 $2"
 }
 
+# open a ripgrep/fzf-picked file in nvim, with preview toggle
 Files () {
   nvim "$(rg  --files |   fzf --prompt=$PWD/ \
     --preview-window='up:50%:hidden' \
@@ -241,6 +277,7 @@ fifa() {
     file="$(rg --max-count=1 --ignore-case --files-with-matches --no-messages "$@" | fzf-tmux +m --preview="rga --ignore-case --pretty --context 10 '"$@"' {}")" && open "$file"
 }
 
+# run the given command and add its output to copyq
 copyq-to () {
 copyq add --  "$(${*})"
 }
@@ -288,30 +325,36 @@ flatcopy () {
   done
 }
 
+# watch path $1, rerun command $2 on change
 watchnrun () {
  f="$1"; c="$2" &&  find $f  | entr $c $f
 }
 
+# browse aliases file with fzf
 view-aliases () {
   cat $bf/aliases.sh | fzf
 }
 
+# edit aliases file in nvim, then re-source it
 wild-editAliases () {
   nvim "$bf/aliases.sh"
   source "$bf/aliases.sh"
 }
 
+# open a file in the personal journal repo
 wilding-journal () {
   cd "$HOME/personal-journal/personal-journal"
   nvim "$HOME/personal-journal/personal-journal/${1}"
   cd -
 }
 
+# google search restricted to reddit.com
 search-on-reddit () {
   firefox "https://www.google.com/search?q=${1}+site%3Areddit.com"
 
 }
 
+# run a local ollama model on the prompt, log output to markdown
 ask_ollama () {
   message="$@"
   echo "${message}"
@@ -319,26 +362,31 @@ ask_ollama () {
   ollama run hf.co/mradermacher/git-commit-1.5B-GGUF:Q5_K_M  "${message}"  | tee -a "${name}" | glow 
 }
 
+# render a file with glow
 show () {
 	cat "${1}" | glow
 }
 # corpus ======================================================================================
 
+# live-grep the personal journal tech notes in nvim
 tldw () {
 cd ~/personal-journal/personal-journal/tech && nvim -c "lua require('telescope.builtin').live_grep({search = '$*'})"
 }
 
+# find files in the personal journal tech notes in nvim
 tldf () {
 cd ~/personal-journal/personal-journal/tech && nvim -c "lua require('telescope.builtin').find_files({search_file = '$*'})"
 }
 
+# convert markdown to pdf and open it
 makepdf() { md2pdf $1; open "$(echo $1 | sed 's/\.md/\.pdf/g')"}
 
+# pick tmux session(s) by name and kill them
 tmux-kill-by-name() {tmux ls -F "#S" | fzf -m | xargs -n 1 tmux kill-session -t}
 
+# open this repo's Rocket Chat channel in the browser
 refuge() {
   local repo="${1:-$(basename $(git rev-parse --show-toplevel 2>/dev/null))}"
   open "https://dev.rocketchat.app/refuge/${repo}"
 }
-
 
