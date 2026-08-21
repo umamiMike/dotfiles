@@ -70,6 +70,7 @@
 | `Space ss` | Select telescope picker |
 | `Space sw` | Grep word under cursor |
 | `Space sg` | Live grep |
+| `Space st` | Live grep, filtered to a file type chosen from `rg --type-list` |
 | `Space sd` | Search LSP document symbols |
 | `Space sD` | Search workspace diagnostics |
 | `Space sr` | Resume last search |

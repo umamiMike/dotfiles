@@ -207,6 +207,13 @@ require('lazy').setup({
       -- See `:help telescope.builtin`
       local builtin = require 'telescope.builtin'
       local get_ivy = require('telescope.themes').get_ivy
+      -- lets live grep pickers select every result with <C-a>, e.g. to send them all to quickfix
+      local with_select_all = function(_, map)
+        local actions = require 'telescope.actions'
+        map('i', '<C-a>', actions.select_all)
+        map('n', '<C-a>', actions.select_all)
+        return true
+      end
       vim.keymap.set('n', '<leader>sh', function()
         builtin.help_tags(get_ivy())
       end, { desc = '[S]earch [H]elp' })
@@ -223,8 +230,19 @@ require('lazy').setup({
         builtin.grep_string(get_ivy())
       end, { desc = '[S]earch current [W]ord' })
       vim.keymap.set('n', '<leader>sg', function()
-        builtin.live_grep(get_ivy())
+        builtin.live_grep(vim.tbl_extend('force', get_ivy(), { attach_mappings = with_select_all }))
       end, { desc = '[S]earch by [G]rep' })
+      vim.keymap.set('n', '<leader>st', function()
+        local types = {}
+        for _, line in ipairs(vim.fn.systemlist 'rg --type-list') do
+          table.insert(types, line:match '^([^:]+):')
+        end
+        vim.ui.select(types, { prompt = 'Grep in file type:' }, function(choice)
+          if choice then
+            builtin.live_grep(vim.tbl_extend('force', get_ivy(), { type_filter = choice, attach_mappings = with_select_all }))
+          end
+        end)
+      end, { desc = '[S]earch by [T]ype (live grep)' })
       vim.keymap.set('n', '<leader>sD', function()
         builtin.diagnostics(get_ivy())
       end, { desc = '[S]earch [D]iagnostics (workspace)' })
@@ -246,6 +264,7 @@ require('lazy').setup({
         builtin.live_grep(get_ivy {
           grep_open_files = true,
           prompt_title = 'Live Grep in Open Files',
+          attach_mappings = with_select_all,
         })
       end, { desc = '[S]earch [/] in Open Files' })
 

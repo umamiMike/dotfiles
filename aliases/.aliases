@@ -135,7 +135,7 @@ alias nvf='nvim $(fzf)'    # open file picked via fzf in nvim
 alias op="fzf --preview='less {}' --bind shift-up:preview-page-up,shift-down:preview-page-down"    # fzf with a preview pane
 
 alias rgf="rg --files | rg "    # list files then filter with ripgrep
-alias se="source $bf/aliases.sh"    # source aliases file
+alias se="source ~/.aliases"    # source aliases file
 
 alias np="nix profile"    # nix profile
 
@@ -332,13 +332,13 @@ watchnrun () {
 
 # browse aliases file with fzf
 view-aliases () {
-  cat $bf/aliases.sh | fzf
+  cat ~.aliases | fzf
 }
 
 # edit aliases file in nvim, then re-source it
 wild-editAliases () {
-  nvim "$bf/aliases.sh"
-  source "$bf/aliases.sh"
+  nvim "~/.aliases"
+  source "~/.aliases"
 }
 
 # open a file in the personal journal repo
@@ -387,6 +387,6 @@ tmux-kill-by-name() {tmux ls -F "#S" | fzf -m | xargs -n 1 tmux kill-session -t}
 # open this repo's Rocket Chat channel in the browser
 refuge() {
   local repo="${1:-$(basename $(git rev-parse --show-toplevel 2>/dev/null))}"
-  open "https://dev.rocketchat.app/refuge/${repo}"
+  open "https://dev.rocketchat.app/refuge/${repo}" &> /dev/null ||  explorer.exe "https://dev.rocketchat.app/refuge/${repo}"
 }
 
