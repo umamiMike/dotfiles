@@ -1,7 +1,7 @@
 # /Users/mikew/.config/tmuxinator/refuge-pipeline.yml
 
 name: refuge-pipeline
-root: ~/repos/refuge/apps/Pipeline
+root: ~/repos/refuge/Pipeline
 
 # Optional tmux socket
 # socket_name: foo
@@ -30,7 +30,6 @@ root: ~/repos/refuge/apps/Pipeline
 pre_window:
   - export refugepipeline="/Users/mikew/repos/refuge/apps/Pipeline"
   - export PYTHONPATH=$PYTHONPATH:${refugepipeline}/Python
-  - source /Users/mikew/repos/refuge/apps/venv/bin/activate
 
 # Pass command line options to tmux. Useful for specifying a different tmux.conf.
 # tmux_options: -f ~/.tmux.mac.conf
