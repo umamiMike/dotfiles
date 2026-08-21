@@ -9,4 +9,6 @@ Prepare to pivot away from the current task, without actually clearing anything 
 
 2. Log a backlog entry for whatever is being left unfinished: $ARGUMENTS if given, otherwise infer a short, accurate description from the conversation. Use the project's existing backlog convention if one exists (e.g. `todo.md`, `TODO.md`); if none exists, ask before creating one.
 
-3. Report what was updated and logged, then tell the user it's safe to run `/clear`.
+3. Load the `handoff` skill and write or update this session's handoff doc, now that step 1 has already closed any CLAUDE.md gaps it would otherwise flag.
+
+4. Report what was updated, logged, and written, then tell the user it's safe to run `/clear`.
