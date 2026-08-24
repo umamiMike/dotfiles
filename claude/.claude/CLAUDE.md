@@ -38,3 +38,4 @@ These rules apply universally to all my projects unless overridden by a local pr
 *The throughline: be precise, be honest, do exactly what's asked, and never surprise me. Earn trust by being predictable and grounded — not by being eager.*
 
 
+@./refuge/CLAUDE.md

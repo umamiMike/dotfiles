@@ -19,6 +19,7 @@ alias wild-ffrom='ff="$(fzf | xargs cat )"; echo "$ff" | fzf'    # pick a file, 
 alias fswatch-ruby="fswatch -o -r --event=Created --event=Updated lib test"    # watch lib/test for ruby file changes
 
 alias ga='git add'                # git add
+
 alias gig='git add .gitignore && git commit -m "ignore"'    # add .gitignore and commit as "ignore"
 alias gb='git branch'             # git branch
 alias gc='git checkout'           # git checkout
@@ -136,8 +137,6 @@ alias op="fzf --preview='less {}' --bind shift-up:preview-page-up,shift-down:pre
 
 alias rgf="rg --files | rg "    # list files then filter with ripgrep
 alias se="source ~/.aliases"    # source aliases file
-
-alias np="nix profile"    # nix profile
 
 alias snvim="sudo /home/mike/.nix-profile/bin/nvim"    # run nvim as sudo
 alias updateshell="nvim ~/.config/wilding/aliases.sh && source ~/.zshrc"    # edit aliases then reload zshrc
@@ -384,9 +383,12 @@ makepdf() { md2pdf $1; open "$(echo $1 | sed 's/\.md/\.pdf/g')"}
 # pick tmux session(s) by name and kill them
 tmux-kill-by-name() {tmux ls -F "#S" | fzf -m | xargs -n 1 tmux kill-session -t}
 
+
+ gaa () {
+		git add $(git status -s | cut -d' ' -f3 | fzf -m)
+}
 # open this repo's Rocket Chat channel in the browser
 refuge() {
   local repo="${1:-$(basename $(git rev-parse --show-toplevel 2>/dev/null))}"
   open "https://dev.rocketchat.app/refuge/${repo}" &> /dev/null ||  explorer.exe "https://dev.rocketchat.app/refuge/${repo}"
 }
-
