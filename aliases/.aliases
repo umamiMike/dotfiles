@@ -19,6 +19,7 @@ alias wild-ffrom='ff="$(fzf | xargs cat )"; echo "$ff" | fzf'    # pick a file, 
 alias fswatch-ruby="fswatch -o -r --event=Created --event=Updated lib test"    # watch lib/test for ruby file changes
 
 alias ga='git add'                # git add
+
 alias gig='git add .gitignore && git commit -m "ignore"'    # add .gitignore and commit as "ignore"
 alias gb='git branch'             # git branch
 alias gc='git checkout'           # git checkout
@@ -392,7 +393,9 @@ makepdf() { md2pdf $1; open "$(echo $1 | sed 's/\.md/\.pdf/g')"}
 tmux-kill-by-name() {tmux ls -F "#S" | fzf -m | xargs -n 1 tmux kill-session -t}
 
 
-gaf() { git add $(git status -s | cut -d' ' -f3 | fzf -m) }
+gaa () {
+		git add $(git status -s | cut -d' ' -f3 | fzf -m)
+}
 # open this repo's Rocket Chat channel in the browser
 	#
 refuge() {
