@@ -105,6 +105,7 @@ require('lazy').setup({
         'query',
         'vim',
         'vimdoc',
+		'haskell',
       }
 
       vim.api.nvim_create_autocmd('FileType', {
@@ -492,6 +493,11 @@ require('lazy').setup({
           end,
         },
       }
+
+      if vim.fn.executable 'haskell-language-server-wrapper' == 1 then
+        vim.lsp.config('hls', { capabilities = capabilities })
+        vim.lsp.enable 'hls'
+      end
     end,
   },
 
@@ -540,6 +546,7 @@ require('lazy').setup({
       -- 	end
       -- end,
       formatters_by_ft = {
+		haskell = { 'fourmolu'},
         lua = { 'stylua' },
         -- Conform can also run multiple formatters sequentially
         python = { 'ruff_fix', 'ruff_format' },

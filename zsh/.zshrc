@@ -121,27 +121,10 @@ setopt completealiases
 source ~/tmuxinator_completion.zsh
 compdef _tmuxinator tmuxinator
 source ~/.aliases
-# source ~/.config/wilding/completions/fzf-completion.zsh
-alias act=". ~/repos/python-sandbox/env/bin/activate"
 export PATH=$PATH:~/repos/byoi/bin
 export PATH=$PATH:~/go/bin
 export PATH=$PATH:~/.config/wilding/shell
 [ -f ~/.config/wilding/shell/wildvid.sh ] && source ~/.config/wilding/shell/wildvid.sh
-
-# export PATH="/opt/homebrew/opt/pyside@2/bin:$PATH"
-#alias python="python3"
-
-# # instead, lazy-load:
-# nvm_lazy() {
-#   unset -f nvm node npm npx
-#   export NVM_DIR="$HOME/.nvm"
-#   [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-#   nvm "$@"
-# }
-
-# for cmd in nvm node npm npx; do
-#   alias $cmd='nvm_lazy $cmd'
-# done
 
 # [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 alias x86="arch -x86_64 zsh --login"
@@ -154,14 +137,6 @@ if command -v pyenv &>/dev/null || [[ -d $PYENV_ROOT/bin ]]; then
   eval "$(pyenv init -)"
 fi
 eval "$(tmuxinator completion zsh)"
-
-# function cd() {
-#     builtin cd "$@"
-#     if [[ "$PWD" == "$HOME/repos/refuge/apps"* ]]; then
-#       source "$HOME/repos/refuge/apps/.env"
-#     fi
-#   }
-#
 
 # zprof
 

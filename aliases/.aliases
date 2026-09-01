@@ -367,15 +367,15 @@ show () {
 }
 # corpus ======================================================================================
 
-# live-grep the personal journal tech notes in nvim
-tldw () {
-cd ~/personal-journal/personal-journal/tech && nvim -c "lua require('telescope.builtin').live_grep({search = '$*'})"
+
+ngrep() {
+  if [ -z "$1" ]; then
+    nvim -c "lua vim.schedule(function() vim.cmd('Telescope live_grep') end)"
+  else
+    nvim -c "lua vim.schedule(function() require('telescope.builtin').live_grep({default_text='$1'}) end)"
+  fi
 }
 
-# find files in the personal journal tech notes in nvim
-tldf () {
-cd ~/personal-journal/personal-journal/tech && nvim -c "lua require('telescope.builtin').find_files({search_file = '$*'})"
-}
 
 # convert markdown to pdf and open it
 makepdf() { md2pdf $1; open "$(echo $1 | sed 's/\.md/\.pdf/g')"}
@@ -384,10 +384,9 @@ makepdf() { md2pdf $1; open "$(echo $1 | sed 's/\.md/\.pdf/g')"}
 tmux-kill-by-name() {tmux ls -F "#S" | fzf -m | xargs -n 1 tmux kill-session -t}
 
 
- gaa () {
-		git add $(git status -s | cut -d' ' -f3 | fzf -m)
-}
+gaf() { git add $(git status -s | cut -d' ' -f3 | fzf -m) }
 # open this repo's Rocket Chat channel in the browser
+	#
 refuge() {
   local repo="${1:-$(basename $(git rev-parse --show-toplevel 2>/dev/null))}"
   open "https://dev.rocketchat.app/refuge/${repo}" &> /dev/null ||  explorer.exe "https://dev.rocketchat.app/refuge/${repo}"

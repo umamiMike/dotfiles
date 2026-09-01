@@ -1,8 +1,7 @@
-# /home/mike/.config/tmuxinator/lucy.yml
+# /Users/mikew/.config/tmuxinator/haskell.yml
 
-name: lucy
-root: ~/repos/refuge/Lucifer
-
+name: haskell
+root: ~/repos/langs/haskell
 # Optional tmux socket
 # socket_name: foo
 
@@ -27,12 +26,12 @@ root: ~/repos/refuge/Lucifer
 # on_project_stop: command
 
 # Runs in each window and pane before window/pane specific commands. Useful for setting up interpreter versions.
-pre_window: . ~/repos/python-sandbox/env/bin/activate
+# pre_window: rbenv shell 2.0.0-p247
 
 # Pass command line options to tmux. Useful for specifying a different tmux.conf.
 # tmux_options: -f ~/.tmux.mac.conf
 
-# Change the command to call tmux.  This can be used by derivatives/wrappers like byobu.
+# Change the command to call tmux. This can be used by derivatives/wrappers like byobu.
 # tmux_command: byobu
 
 # Specifies (by name or index) which window will be selected on project startup. If not set, the first window is used.
@@ -51,6 +50,4 @@ windows:
       # 'before' represents legacy functionality and will be deprecated in a future release, in favour of 'after'
       # synchronize: after
       panes:
-        - nvim lucifer_base_window.py
-        - tests: find . -maxdepth 3  -name '*.py'  | entr  -cp python -m unittest tests/*.py -v
-
+        - nvim .
