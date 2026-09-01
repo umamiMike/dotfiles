@@ -60,7 +60,7 @@
 | `<Esc>` | n | Clear search highlight |
 | `<Esc><Esc>` | t | Exit terminal mode |
 
-### Telescope / Search (`Space s`)
+### Telescope / Search (`Space s`) — all ivy theme
 
 | Key | Action |
 |-----|--------|
@@ -70,13 +70,15 @@
 | `Space ss` | Select telescope picker |
 | `Space sw` | Grep word under cursor |
 | `Space sg` | Live grep |
-| `Space sd` | Search diagnostics |
+| `Space st` | Live grep, filtered to a file type chosen from `rg --type-list` |
+| `Space sd` | Search LSP document symbols |
+| `Space sD` | Search workspace diagnostics |
 | `Space sr` | Resume last search |
 | `Space s.` | Recent files |
 | `Space s/` | Live grep in open files |
 | `Space sn` | Search nvim config files |
-| `Space /` | Fuzzy search current buffer |
-| `Space Space` | Find open buffers |
+| `Space /` | Fuzzy search current buffer (ivy theme) |
+| `Space Space` | Find open buffers (ivy theme) |
 
 ### LSP (active when LSP attached)
 

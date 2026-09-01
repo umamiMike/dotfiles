@@ -115,6 +115,25 @@ examples of adding popularly requested plugins.
 > [!NOTE]
 > For more information about a particular plugin check its repository's documentation.
 
+### LSP Stack: Mason vs lspconfig
+
+`mason.nvim`, `mason-lspconfig.nvim`, and `nvim-lspconfig` are not competing
+setups — they're three layers of one pipeline, wired together in `init.lua`:
+
+| Plugin | Role |
+|---|---|
+| `mason.nvim` | Installs LSP binaries |
+| `mason-lspconfig.nvim` | Bridges Mason installs to lspconfig server names, drives setup |
+| `nvim-lspconfig` | Provides the actual per-server config definitions that `mason-lspconfig` calls into |
+
+The flow:
+
+1. The `servers` table in `init.lua` holds per-server overrides (e.g. `pyright`, `ruff`, `lua_ls`).
+2. `mason-tool-installer.setup` installs the binaries for `vim.tbl_keys(servers)` plus any extra tools (e.g. `stylua`).
+3. `mason-lspconfig.setup{ automatic_enable = true, handlers = {...} }` runs its handler for every installed server: it merges `blink.cmp` capabilities into that server's config, then calls `require('lspconfig')[server_name].setup(server)`.
+
+`lspconfig` is what actually starts each LSP client; Mason just ensures the
+binary exists and triggers that setup call per server.
 
 ### Getting Started
 

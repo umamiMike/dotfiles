@@ -105,6 +105,7 @@ require('lazy').setup({
         'query',
         'vim',
         'vimdoc',
+		'haskell',
       }
 
       vim.api.nvim_create_autocmd('FileType', {
@@ -206,28 +207,71 @@ require('lazy').setup({
 
       -- See `:help telescope.builtin`
       local builtin = require 'telescope.builtin'
-      vim.keymap.set('n', '<leader>sh', builtin.help_tags, { desc = '[S]earch [H]elp' })
-      vim.keymap.set('n', '<leader>sk', builtin.keymaps, { desc = '[S]earch [K]eymaps' })
-      vim.keymap.set('n', '<leader>sf', builtin.find_files, { desc = '[S]earch [F]iles' })
-      vim.keymap.set('n', '<leader>ss', builtin.builtin, { desc = '[S]earch [S]elect Telescope' })
-      vim.keymap.set('n', '<leader>sw', builtin.grep_string, { desc = '[S]earch current [W]ord' })
-      vim.keymap.set('n', '<leader>sg', builtin.live_grep, { desc = '[S]earch by [G]rep' })
-      vim.keymap.set('n', '<leader>sd', builtin.diagnostics, { desc = '[S]earch [D]iagnostics' })
-      vim.keymap.set('n', '<leader>sr', builtin.resume, { desc = '[S]earch [R]esume' })
-      vim.keymap.set('n', '<leader>s.', builtin.oldfiles, { desc = '[S]earch Recent Files ("." for repeat)' })
-      vim.keymap.set('n', '<leader><leader>', builtin.buffers, { desc = '[ ] Find existing buffers' })
+      local get_ivy = require('telescope.themes').get_ivy
+      -- lets live grep pickers select every result with <C-a>, e.g. to send them all to quickfix
+      local with_select_all = function(_, map)
+        local actions = require 'telescope.actions'
+        map('i', '<C-a>', actions.select_all)
+        map('n', '<C-a>', actions.select_all)
+        return true
+      end
+      vim.keymap.set('n', '<leader>sh', function()
+        builtin.help_tags(get_ivy())
+      end, { desc = '[S]earch [H]elp' })
+      vim.keymap.set('n', '<leader>sk', function()
+        builtin.keymaps(get_ivy())
+      end, { desc = '[S]earch [K]eymaps' })
+      vim.keymap.set('n', '<leader>sf', function()
+        builtin.find_files(get_ivy())
+      end, { desc = '[S]earch [F]iles' })
+      vim.keymap.set('n', '<leader>ss', function()
+        builtin.builtin(get_ivy())
+      end, { desc = '[S]earch [S]elect Telescope' })
+      vim.keymap.set('n', '<leader>sw', function()
+        builtin.grep_string(get_ivy())
+      end, { desc = '[S]earch current [W]ord' })
+      vim.keymap.set('n', '<leader>sg', function()
+        builtin.live_grep(vim.tbl_extend('force', get_ivy(), { attach_mappings = with_select_all }))
+      end, { desc = '[S]earch by [G]rep' })
+      vim.keymap.set('n', '<leader>st', function()
+        local types = {}
+        for _, line in ipairs(vim.fn.systemlist 'rg --type-list') do
+          table.insert(types, line:match '^([^:]+):')
+        end
+        vim.ui.select(types, { prompt = 'Grep in file type:' }, function(choice)
+          if choice then
+            builtin.live_grep(vim.tbl_extend('force', get_ivy(), { type_filter = choice, attach_mappings = with_select_all }))
+          end
+        end)
+      end, { desc = '[S]earch by [T]ype (live grep)' })
+      vim.keymap.set('n', '<leader>sD', function()
+        builtin.diagnostics(get_ivy())
+      end, { desc = '[S]earch [D]iagnostics (workspace)' })
+      vim.keymap.set('n', '<leader>sd', function()
+        builtin.lsp_document_symbols(get_ivy())
+      end, { desc = '[S]earch [D]ocument Symbols' })
+      vim.keymap.set('n', '<leader>sr', function()
+        builtin.resume(get_ivy())
+      end, { desc = '[S]earch [R]esume' })
+      vim.keymap.set('n', '<leader>s.', function()
+        builtin.oldfiles(get_ivy())
+      end, { desc = '[S]earch Recent Files ("." for repeat)' })
+      vim.keymap.set('n', '<leader><leader>', function()
+        builtin.buffers(get_ivy())
+      end, { desc = '[ ] Find existing buffers' })
       -- It's also possible to pass additional configuration options.
       --  See `:help telescope.builtin.live_grep()` for information about particular keys
       vim.keymap.set('n', '<leader>s/', function()
-        builtin.live_grep {
+        builtin.live_grep(get_ivy {
           grep_open_files = true,
           prompt_title = 'Live Grep in Open Files',
-        }
+          attach_mappings = with_select_all,
+        })
       end, { desc = '[S]earch [/] in Open Files' })
 
       -- Shortcut for searching your Neovim configuration files
       vim.keymap.set('n', '<leader>sn', function()
-        builtin.find_files { cwd = vim.fn.stdpath 'config' }
+        builtin.find_files(get_ivy { cwd = vim.fn.stdpath 'config' })
       end, { desc = '[S]earch [N]eovim files' })
 
       -- My Custom ones moved over
@@ -413,6 +457,7 @@ require('lazy').setup({
                 useLibraryCodeForTypes = true,
               },
               venvPath = '.',
+              pythonPath = vim.fn.has 'wsl' == 1 and '/mnt/c/Users/mikew/AppData/Local/refuge/pipeline/bin/python/python.exe' or nil,
             },
           },
         },
@@ -448,6 +493,11 @@ require('lazy').setup({
           end,
         },
       }
+
+      if vim.fn.executable 'haskell-language-server-wrapper' == 1 then
+        vim.lsp.config('hls', { capabilities = capabilities })
+        vim.lsp.enable 'hls'
+      end
     end,
   },
 
@@ -465,6 +515,20 @@ require('lazy').setup({
         desc = '[F]ormat buffer',
       },
     },
+    config = function(_, opts)
+      require('conform').setup(opts)
+      vim.api.nvim_create_user_command('Format', function(args)
+        local range = nil
+        if args.count ~= -1 then
+          local end_line = vim.api.nvim_buf_get_lines(0, args.line2 - 1, args.line2, true)[1]
+          range = {
+            start = { args.line1, 0 },
+            ['end'] = { args.line2, end_line:len() },
+          }
+        end
+        require('conform').format { async = true, lsp_format = 'fallback', range = range }
+      end, { range = true, desc = 'Format buffer or range' })
+    end,
     opts = {
       notify_on_error = false,
       -- format_on_save = function(bufnr)
@@ -482,11 +546,12 @@ require('lazy').setup({
       -- 	end
       -- end,
       formatters_by_ft = {
+		haskell = { 'fourmolu'},
         lua = { 'stylua' },
         -- Conform can also run multiple formatters sequentially
         python = { 'ruff_fix', 'ruff_format' },
         cpp = { 'clang-format' },
-        --
+        markdown = { 'prettierd', 'prettier', stop_after_first = true },
         -- You can use 'stop_after_first' to run the first available formatter from the list
         -- javascript = { "prettierd", "prettier", stop_after_first = true },
       },
@@ -582,7 +647,7 @@ require('lazy').setup({
   { import = 'custom.plugins' },
 }, {
   git = {
-    cmd = vim.fn.getenv('WSL_DISTRO_NAME') ~= vim.NIL and '/usr/bin/git' or 'git',
+    cmd = vim.fn.getenv 'WSL_DISTRO_NAME' ~= vim.NIL and '/usr/bin/git' or 'git',
   },
   ui = {
     -- If you are using a Nerd Font: set icons to an empty table which will use the
@@ -669,4 +734,3 @@ vim.keymap.set('v', '<leader>p', insert_print_from_visual, { silent = true, desc
 if vim.fn.has 'wsl' == 1 then
   vim.g.python3_host_prog = '/mnt/c/Users/mikew/AppData/Local/refuge/pipeline/bin/python/python.exe'
 end
-

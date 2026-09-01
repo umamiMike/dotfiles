@@ -22,6 +22,8 @@
     cabal-install
     (haskellPackages.ghcWithPackages (p: with p; [ text containers ]))
     # nmap
+	haskell-language-server
+	fourmolu
     tmux
     tmuxinator
     nil
