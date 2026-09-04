@@ -28,10 +28,16 @@ alias gca='git commit --amend'    # git commit --amend
 alias gcme='git commit -m '       # git commit -m
 alias gd='git diff'               # git diff
 alias gdh='git diff HEAD~1'       # diff the last commit
+alias gf="git fetch"
+alias gfo="git fetch origin"
+alias g-both="git ls-files -u"
 
+alias gu="git ls-files -u | cut -f 2 | sort -u"
 alias gdno='git diff --name-only'                     # git diff, name-only
 alias gsno='git diff --name-only --staged'            # staged files, name-only
 alias gano='git status --porcelain | cut -c4-'        # all changed: staged + unstaged + untracked
+alias gr="git rebase"
+alias gw='git worktree'
 
 alias n-gsno='nvim $(gsno | fzf)'     # open staged files
 alias n-gano='nvim $(gano | fzf)'     # open any changed/untracked file
@@ -130,7 +136,6 @@ alias hh='cat ~/.bash_history | sort | uniq | fzf'    # search bash history with
 alias gsls="gsutil ls | fzf | xargs gsutil ls "    # browse gsutil ls output, then list selection
 
 #
-alias nvf='nvim $(fzf)'    # open file picked via fzf in nvim
 #
 # usage > op | xargs cat >> somefile.txt  will echo every selected file to a single text file
 alias op="fzf --preview='less {}' --bind shift-up:preview-page-up,shift-down:preview-page-down"    # fzf with a preview pane
