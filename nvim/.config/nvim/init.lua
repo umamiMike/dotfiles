@@ -39,19 +39,6 @@ vim.o.termguicolors = true
 
 vim.env.PATH = vim.fn.expand '~/bin' .. ':' .. vim.env.PATH
 
-opt.fillchars = {
-  diff = '╱',
-}
-
-opt.diffopt = {
-  'internal',
-  'filler',
-  'closeoff',
-  'context:12',
-  'algorithm:histogram',
-  'linematch:200',
-  'indent-heuristic',
-}
 -- [[ Install `lazy.nvim` plugin manager ]]
 --    See `:help lazy.nvim.txt` or https://github.com/folke/lazy.nvim for more info
 local lazypath = vim.fn.stdpath 'data' .. '/lazy/lazy.nvim'
@@ -68,20 +55,10 @@ local rtp = vim.opt.rtp
 rtp:prepend(lazypath)
 
 local commands = require 'custom.commands'
+local git = require 'custom.git'
 -- NOTE: Here is where you install your plugins.
 require('lazy').setup({
-  { -- Adds git related signs to the gutter, as well as utilities for managing changes
-    'lewis6991/gitsigns.nvim',
-    opts = {
-      signs = {
-        add = { text = '+' },
-        change = { text = '~' },
-        delete = { text = '_' },
-        topdelete = { text = '‾' },
-        changedelete = { text = '~' },
-      },
-    },
-  },
+  git.gitsigns,
 
   { -- Highlight, edit, and navigate code
     'nvim-treesitter/nvim-treesitter',
@@ -165,7 +142,7 @@ require('lazy').setup({
       spec = {
         { '<leader>s', group = '[S]earch' },
         { '<leader>t', group = '[T]oggle' },
-        { '<leader>h', group = 'Git [H]unk', mode = { 'n', 'v' } },
+        git.whichkey_spec,
       },
     },
   },
@@ -642,7 +619,7 @@ require('lazy').setup({
   -- require 'kickstart.plugins.lint',
   require 'kickstart.plugins.autopairs',
   -- require 'kickstart.plugins.neo-tree',
-  require 'kickstart.plugins.gitsigns', -- adds gitsigns recommend keymaps
+  git.gitsigns_keymaps,
   --  Uncomment the following line and add your plugins to `lua/custom/plugins/*.lua` to get going.
   { import = 'custom.plugins' },
 }, {
@@ -689,11 +666,10 @@ vim.keymap.set('v', '<leader>ew', commands.extract_to_new_file, { desc = 'Extrac
 vim.keymap.set('n', '<C-l>', function()
   vim.cmd 'cnext'
 end, { desc = 'cnext' })
-vim.keymap.set('n', '<C-k>', function()
+vim.keymap.set('n', '<C-h>', function()
   vim.cmd 'cprev'
 end, { desc = 'cprev' })
 
-require 'custom.git'
 vim.keymap.set('n', 'td', commands.toggle_buf, { desc = 'Toggle todo.md' })
 vim.keymap.set('n', '<leader>o', function()
   vim.fn.system "tmux split-window -h 'claude'"

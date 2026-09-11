@@ -1,3 +1,36 @@
+local M = {}
+
+vim.opt.fillchars = {
+  diff = '╱',
+}
+
+vim.opt.diffopt = {
+  'internal',
+  'filler',
+  'closeoff',
+  'context:12',
+  'algorithm:histogram',
+  'linematch:200',
+  'indent-heuristic',
+}
+
+M.gitsigns = { -- Adds git related signs to the gutter, as well as utilities for managing changes
+  'lewis6991/gitsigns.nvim',
+  opts = {
+    signs = {
+      add = { text = '+' },
+      change = { text = '~' },
+      delete = { text = '_' },
+      topdelete = { text = '‾' },
+      changedelete = { text = '~' },
+    },
+  },
+}
+
+M.gitsigns_keymaps = require 'kickstart.plugins.gitsigns' -- adds gitsigns recommend keymaps
+
+M.whichkey_spec = { '<leader>h', group = 'Git [H]unk', mode = { 'n', 'v' } }
+
 ----- git keymaps
 vim.keymap.set('n', '<leader>go', ':tab Git<CR>', { desc = 'open git in tab' })
 vim.keymap.set('n', '<leader>gr', function()
@@ -19,3 +52,5 @@ end, { desc = 'Open file+line on [R]efuge' })
 vim.keymap.set('n', '<leader>gc', ':Git commit', { desc = 'Make a git commit' })
 vim.keymap.set('n', '<leader>gca', ':Git commit --amend', { desc = 'Amend the commit message' })
 vim.keymap.set('n', '<leader>ga', ':Git add %<CR>', { desc = 'add current file' })
+
+return M
