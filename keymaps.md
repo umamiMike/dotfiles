@@ -80,19 +80,19 @@
 | `Space /` | Fuzzy search current buffer (ivy theme) |
 | `Space Space` | Find open buffers (ivy theme) |
 
-### LSP (active when LSP attached)
+### LSP (`Space l`, active when LSP attached)
 
 | Key | Mode | Action |
 |-----|------|--------|
-| `gd` | n | Go to definition |
-| `gv` | n | Go to definition (vertical split) |
-| `grr` | n | Go to references |
-| `gri` | n | Go to implementation |
-| `grD` | n | Go to declaration |
-| `gra` | n/x | Code action |
-| `gO` | n | Document symbols |
-| `gw` | n | Workspace symbols |
-| `lt` | n | Type definition |
+| `Space ld` | n | Definition |
+| `Space lD` | n | Declaration |
+| `Space lv` | n | Definition (vertical split) |
+| `Space li` | n | Implementation |
+| `Space lR` | n | References |
+| `Space lt` | n | Type definition |
+| `Space lo` | n | Document symbols (outline) |
+| `Space lw` | n | Workspace symbols |
+| `Space la` | n/x | Code action |
 | `Space lr` | n | Rename symbol |
 | `Space f` | n/v | Format buffer (conform) |
 | `Space q` | n | Open diagnostic quickfix list |
