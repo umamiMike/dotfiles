@@ -58,6 +58,7 @@ local commands = require 'custom.commands'
 local git = require 'custom.git'
 local lsp = require 'custom.lsp'
 local search = require 'custom.search'
+local test = require 'custom.test'
 -- NOTE: Here is where you install your plugins.
 require('lazy').setup({
   git.gitsigns,
@@ -144,6 +145,7 @@ require('lazy').setup({
       spec = {
         { '<leader>s', group = '[S]earch' },
         { '<leader>t', group = '[T]oggle' },
+        { '<leader>T', group = '[T]esting' },
         { '<leader>l', group = '[L]SP' },
         git.whichkey_spec,
       },
@@ -151,6 +153,7 @@ require('lazy').setup({
   },
 
   search.telescope,
+  test.neotest,
 
   -- LSP Plugins
   lsp.lazydev,
@@ -247,7 +250,6 @@ vim.keymap.set(
 )
 vim.keymap.set('n', '<leader>rh', ':bo term g++ *.cpp -Wall && ./a.out<cr>', { desc = 'build with g++ and run a.out' })
 vim.keymap.set('n', '<F5>', ':RunFile<cr>', { desc = 'run file' })
-vim.keymap.set('n', '<S-F5>', ':Neotest run<cr>', { desc = 'run e' })
 vim.keymap.set('n', '<leader>\\', ':vsp<cr>', { desc = 'split vertical' })
 vim.keymap.set('n', '<leader>-', ':sp<cr>', { desc = 'split horizontal' })
 vim.keymap.set('n', '-', ':Ex<CR>', { desc = 'go up' })

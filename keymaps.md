@@ -98,6 +98,17 @@
 | `Space q` | n | Open diagnostic quickfix list |
 | `Space th` | n | Toggle inlay hints |
 
+### Testing — neotest (`Space T`)
+
+| Key | Action |
+|-----|--------|
+| `Space Tt` | Run nearest test |
+| `Space Tf` | Run current file |
+| `Space Tl` | Run last test |
+| `Space Ts` | Toggle summary panel |
+| `Space To` | Toggle output panel |
+| `Space Tx` | Stop |
+
 ### Git — Fugitive (`Space g`)
 
 | Key | Action |
@@ -130,7 +141,6 @@
 | Key | Action |
 |-----|--------|
 | `Space ru` / `F5` | Run file (code_runner) |
-| `S-F5` | Run neotest |
 | `Space rv` | g++ build + run in tmux vertical split |
 | `Space rx` | g++ build with -g + run gdb in tmux split |
 | `Space rh` | g++ build + run in horizontal terminal |
