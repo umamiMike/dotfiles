@@ -114,9 +114,18 @@
 | Key | Action |
 |-----|--------|
 | `Space go` | Open git status in tab |
+| `Space gl` | File history to quickfix |
+| `Space gd` | Diff file against a prompted revision |
 | `Space gc` | Git commit |
 | `Space gca` | Git commit --amend |
 | `Space ga` | Git add current file |
+
+### Git — Repo (`Space R`)
+
+| Key | Action |
+|-----|--------|
+| `Space Ro` | Open repo on Refuge |
+| `Space Rl` | Copy + open file+line link on Refuge |
 
 ### Git — Gitsigns (`Space h`)
 

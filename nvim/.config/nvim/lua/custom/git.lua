@@ -29,15 +29,32 @@ M.gitsigns = { -- Adds git related signs to the gutter, as well as utilities for
 
 M.gitsigns_keymaps = require 'kickstart.plugins.gitsigns' -- adds gitsigns recommend keymaps
 
-M.whichkey_spec = { '<leader>h', group = 'Git [H]unk', mode = { 'n', 'v' } }
+M.whichkey_spec = {
+  { '<leader>g', group = 'Git', mode = { 'n' } },
+  { '<leader>h', group = 'Git [H]unk', mode = { 'n', 'v' } },
+  { '<leader>R', group = 'Repo', mode = { 'n' } },
+}
 
 ----- git keymaps
 vim.keymap.set('n', '<leader>go', ':tab Git<CR>', { desc = 'open git in tab' })
-vim.keymap.set('n', '<leader>gr', function()
+vim.keymap.set('n', '<leader>gl', ':0Gclog<CR>', { desc = 'file history to quickfix' })
+vim.keymap.set('n', '<leader>gd', function()
+  vim.ui.input({ prompt = 'Diff against revision: ' }, function(rev)
+    if rev and rev ~= '' then
+      vim.cmd('Gvdiffsplit ' .. rev)
+    end
+  end)
+end, { desc = 'diff file against revision' })
+vim.keymap.set('n', '<leader>gc', ':Git commit', { desc = 'Make a git commit' })
+vim.keymap.set('n', '<leader>gca', ':Git commit --amend', { desc = 'Amend the commit message' })
+vim.keymap.set('n', '<leader>ga', ':Git add %<CR>', { desc = 'add current file' })
+
+----- repo keymaps
+vim.keymap.set('n', '<leader>Ro', function()
   local repo = vim.fn.fnamemodify(vim.fn.system('git rev-parse --show-toplevel'):gsub('\n', ''), ':t')
   vim.fn.system('open https://dev.rocketchat.app/refuge/' .. repo)
-end, { desc = 'Open repo on [R]efuge' })
-vim.keymap.set('n', '<leader>gR', function()
+end, { desc = '[O]pen repo on Refuge' })
+vim.keymap.set('n', '<leader>Rl', function()
   local root = vim.fn.system('git rev-parse --show-toplevel'):gsub('\n', '')
   local repo = vim.fn.fnamemodify(root, ':t')
   local commit = vim.fn.system('git rev-parse HEAD'):gsub('\n', '')
@@ -48,9 +65,6 @@ vim.keymap.set('n', '<leader>gR', function()
   vim.fn.setreg('+', md)
   vim.fn.system('open ' .. url)
   vim.notify('Copied: ' .. md)
-end, { desc = 'Open file+line on [R]efuge' })
-vim.keymap.set('n', '<leader>gc', ':Git commit', { desc = 'Make a git commit' })
-vim.keymap.set('n', '<leader>gca', ':Git commit --amend', { desc = 'Amend the commit message' })
-vim.keymap.set('n', '<leader>ga', ':Git add %<CR>', { desc = 'add current file' })
+end, { desc = '[L]ink file+line on Refuge' })
 
 return M
