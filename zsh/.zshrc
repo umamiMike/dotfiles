@@ -1,6 +1,8 @@
 # Completions
 # zmodload zsh/zprof
 autoload -U compinit
+autoload -Uz bracketed-paste-magic
+zle -N bracketed-paste bracketed-paste-magic
 compinit -C
 
 # If you come from bash you might have to change your $PATH.

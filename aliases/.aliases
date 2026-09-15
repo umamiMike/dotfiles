@@ -76,6 +76,8 @@ alias grv='git remote -v'    # git remote -v
 
 alias gs='git status'    # git status
 
+alias g-conflict='nvim $(git ls-files -u | cut -f 2| fzf)' # fix conflicted files
+
 alias vba='. venv/bin/activate'    # activate python venv
 # Git alias tab completions (bash + zsh compatible)
 if [ -n "$ZSH_VERSION" ]; then
@@ -398,9 +400,9 @@ makepdf() { md2pdf $1; open "$(echo $1 | sed 's/\.md/\.pdf/g')"}
 tmux-kill-by-name() {tmux ls -F "#S" | fzf -m | xargs -n 1 tmux kill-session -t}
 
 
-gaa () {
-		git add $(git status -s | cut -d' ' -f3 | fzf -m)
-}
+# function gaa() {
+# 		git add $(git status -s | cut -d' ' -f3 | fzf -m)
+# }
 # open this repo's Rocket Chat channel in the browser
 	#
 refuge() {
