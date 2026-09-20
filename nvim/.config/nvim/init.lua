@@ -33,7 +33,10 @@ opt.cursorline = true -- Show which line your cursor is on
 
 vim.o.scrolloff = 40 -- Minimal number of screen lines to keep above and below the cursor.
 vim.o.confirm = true
-vim.o.foldmethod = 'indent'
+-- vim.o.foldmethod = 'indent'
+vim.o.foldmethod = 'expr'
+vim.o.foldexpr = 'v:lua.vim.treesitter.foldexpr()'
+vim.o.foldlevelstart = 99
 vim.o.foldenable = true
 vim.o.termguicolors = true
 
