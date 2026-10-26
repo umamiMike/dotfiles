@@ -96,6 +96,29 @@ home-manager switch --flake /home/mike/.dotfiles/home-manager/.config/home-manag
 
 ---
 
+## zsh on a new Linux machine
+
+`zsh` is installed by home-manager (`linux.nix`). Oh My Zsh and the login shell are set up by hand:
+
+```bash
+# 1. install packages (includes zsh)
+home-manager switch --flake $HOME/.dotfiles/home-manager/.config/home-manager#mike
+
+# 2. link .zshrc and what it sources (~/.aliases, ~/tmuxinator_completion.zsh)
+#    must run before step 3, or the installer replaces ~/.zshrc
+cd ~/.dotfiles && stow zsh aliases tmuxinator
+
+# 3. install Oh My Zsh into ~/.oh-my-zsh, keeping the stowed .zshrc
+KEEP_ZSHRC=yes RUNZSH=no CHSH=no sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+
+# 4. make the nix zsh an allowed login shell, then switch to it
+command -v zsh | sudo tee -a /etc/shells
+chsh -s "$(command -v zsh)"
+# log out and back in
+```
+
+---
+
 ## If you add a new tool (e.g. zsh)
 
 Stow's home folder is ~/dotfiles/

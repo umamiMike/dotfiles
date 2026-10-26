@@ -14,5 +14,6 @@
     tealdeer
     tmux
     tmuxinator
+    zsh
   ];
 }
